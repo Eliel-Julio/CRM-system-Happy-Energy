@@ -3,22 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Gerador de proposta comercial</title>
+    <title>Happy Energy - Gerador de Propostas Comerciais</title>
 </head>
-<body>
-<main>
-    <h1>Gerador de proposta comercial</h1>
-    <p>Bem-vindo ao gerador de propostas comerciais!</p>
-    <div id="Kits-container" class="container">
-        <h2>Gerenciar Kits</h2>
-    </div>
-    <div id="Leads-container" class="container">
-        <h2>Gerenciar Leads</h2>
-    </div>
-    <div id="Propostas-container" class="container">
-        <h2>Gerenciar Propostas</h2>
-    </div>
-</main>
+<body data-bs-theme=darkk>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg shadow-sm sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-lightning-fill"></i> Happy Energy
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#Kits-container"><i class="bi bi-box"></i> Kits</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#Leads-container"><i class="bi bi-people"></i> Leads</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#Propostas-container"><i class="bi bi-file-earmark-text"></i> Propostas</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid px-4 px-lg-5">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="container">
+                <h1><i class="bi bi-file-earmark-check"></i> Gerador de Propostas Comerciais</h1>
+                <p class="lead mb-0">Crie, gerencie e acompanhe suas propostas comerciais de forma simples e profissional.</p>
+            </div>
+        </div>
+
+        <div class="container-lg">
+            <!-- Kits Section -->
+            <div id="Kits-container" class="section-card">
+                <div class="card-header">
+                    <h2><i class="bi bi-box-seam"></i> Gerenciar Kits</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Organize e gerencie seus kits de produtos e serviços para criar propostas.</p>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-action">
+                            <i class="bi bi-plus-circle"></i> Adicionar Kit
+                        </button>
+                        <button class="btn btn-outline-primary btn-action" onclick="location.href='/kits'">
+                            <i class="bi bi-list-ul"></i> Ver Lista de Kits
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leads Section -->
+            <div id="Leads-container" class="section-card">
+                <div class="card-header">
+                    <h2><i class="bi bi-people-fill"></i> Gerenciar Leads</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Controle seus leads e oportunidades de venda para gerar propostas personalizadas.</p>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-action">
+                            <i class="bi bi-plus-circle"></i> Adicionar Lead
+                        </button>
+                        <button class="btn btn-outline-primary btn-action">
+                            <i class="bi bi-list-ul"></i> Ver Lista de Leads
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Propostas Section -->
+            <div id="Propostas-container" class="section-card">
+                <div class="card-header">
+                    <h2><i class="bi bi-file-text"></i> Gerenciar Propostas</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Crie e acompanhe o status de suas propostas comerciais com facilidade.</p>
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-action">
+                            <i class="bi bi-plus-circle"></i> Nova Proposta
+                        </button>
+                        <button class="btn btn-outline-primary btn-action">
+                            <i class="bi bi-list-ul"></i> Ver Propostas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer"></footer>
+    <script src="{{ url_for('static', filename='templats.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>

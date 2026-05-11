@@ -1,5 +1,100 @@
-.container{
-    margin: 20px;
-    background-color: red;
-    
+[data-bs-theme=dark] {
+    --brand-color: #fbdc06;
+    --dark-bg: #212529;
+}
+.form-grid-compact {
+    .form-section {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+        h3{
+            color: var(--primary-color);
+            margin-bottom: 1.25rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .form-group-compact {
+            .form-label {
+                font-size: 0.85rem;
+                font-weight: 600;
+                margin-bottom: 0.35rem;
+                color: #495057;
+            }
+            .form-control,
+            .form-select {
+                font-size: 0.9rem;
+                padding: 0.4rem 0.6rem;
+                border-radius: 0.35rem;
+            }
+            /* margin-bottom: 0.75rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem; */
+        }
+    }
+}
+:root {
+    --primary-color: #01244A;
+    --brand-color: var(--primary-color);
+    --dark-bg: #f8f9fa;
+}
+body {
+    /* background-color: var(--dark-bg); */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--brand-color) !important;
+}
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #010b16 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+    h1{
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+}
+.section-card {
+    /* background: white; */
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: box-shadow 0.3s ease;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    .card-body {
+        padding: 1.5rem;
+    }
+    &:hover{
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .card-header{
+        background-color: var(--primary-color);
+        color: white;
+        padding: 1.5rem;
+        border: none;
+        h2{
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+    }
+}
+
+footer {
+    /* background-color: white; */
+    border-top: 1px solid #e9ecef;
+    padding: 2rem 0;
+    margin-top: 3rem;
+    text-align: center;
+    color: #6c757d;
 }
