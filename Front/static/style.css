@@ -2,38 +2,49 @@
     --brand-color: #fbdc06;
     --dark-bg: #212529;
 }
-.form-grid-compact {
-    .form-section {
-        background: white;
-        padding: 1.25rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin-bottom: 1.5rem;
-        h3{
-            color: var(--primary-color);
-            margin-bottom: 1.25rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        .form-group-compact {
-            .form-label {
-                font-size: 0.85rem;
-                font-weight: 600;
-                margin-bottom: 0.35rem;
-                color: #495057;
-            }
-            .form-control,
-            .form-select {
-                font-size: 0.9rem;
-                padding: 0.4rem 0.6rem;
-                border-radius: 0.35rem;
-            }
-            /* margin-bottom: 0.75rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem; */
-        }
+.form-grid-full{
+    grid-column: 1 / -1;
+}
+.form-section {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+    h3{
+        color: var(--primary-color);
+        margin-bottom: 1.25rem;
+        font-weight: 600;
+        font-size: 1.1rem;
     }
+    .form-group-compact {
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            color: #495057;
+        }
+        .form-control,
+        .form-select {
+            font-size: 0.9rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 0.35rem;
+        }
+        /* margin-bottom: 0.75rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem; */
+    }
+    .btn-form-group {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .form-grid-compact {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+}
 }
 :root {
     --primary-color: #01244A;
