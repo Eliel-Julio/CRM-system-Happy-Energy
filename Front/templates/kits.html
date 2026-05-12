@@ -290,6 +290,7 @@
                 mostrarAlerta('Erro ao enviar dados: ' + erro.message, 'danger');
                 console.error('Erro:', erro);
             }
+            
         });
 
         // Renderizar kits
@@ -305,14 +306,14 @@
                 `;
                 return;
             }
-            console.log("debug", kitsParaRenderizar.length);
+            console.log("debug--", kitsParaRenderizar.length);
             kitsContainer.innerHTML = kitsParaRenderizar.map(kit => `
                 <div class="kit-item">
                     <div class="kit-info">
-                        <h5>${kit.nome} <span class="badge-custom">${kit.categoria}</span></h5>
-                        <p><strong>Potência:</strong> ${kit.potencia} kWp | <strong>Módulos:</strong> ${kit.numModulos}x ${kit.marcaModulo}</p>
-                        <p><strong>Inversor:</strong> ${kit.marcaInversor} ${kit.modeloInversor} | <strong>Custo:</strong> R$ ${kit.custoProd.toFixed(2).replace('.', ',')}</p>
-                        <p><strong>Venda:</strong> R$ ${kit.precoVenda.toFixed(2).replace('.', ',')} ${kit.descricao ? `| <em>${kit.descricao}</em>` : ''}</p>
+                        <h5>${kit.nome}</h5>
+                        <p><strong>Potência:</strong> ${kit.p_modulos} W | <strong>Módulos:</strong> ${kit.n_modulos}x módulos</p>
+                        <p><strong>Inversor:</strong> ${kit.inversor} | <strong>Custo:</strong> R$ ${(kit.preco_c / 100).toFixed(2).replace('.', ',')}</p>
+                        ${kit.descricao ? `<p><em>${kit.descricao}</em></p>` : ''}
                     </div>
                     <div class="kit-actions">
                         <button class="btn btn-sm btn-outline-primary" onclick="editarKit(${kit.id})" title="Editar">
@@ -324,6 +325,7 @@
                     </div>
                 </div>
             `).join('');
+            
         }
 
         // Buscar e filtrar
@@ -394,13 +396,15 @@
         fetch('http://127.0.0.1:5000/get_kits')
             .then(res => res.json())
             .then(data => {
-                kits = data.kits || [];
-                renderizarKits(kits);
+                console.log("debug kits carregados", data);
+                // console.log("debug kits carregados", kits);
+                renderizarKits(data);
             })
             .catch(erro => {
                 mostrarAlerta('Erro ao carregar kits: ' + erro.message, 'danger');
                 console.error('Erro:', erro);
             })
+        
         
     </script>
 </body>
