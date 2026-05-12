@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, FLOAT
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-engine = create_engine('sqlite:///crm.db')
+engine = create_engine('sqlite:///Backend/Database/crm.db')
 Session = sessionmaker(bind=engine)
 session = Session()
 base = declarative_base()

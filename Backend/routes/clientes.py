@@ -19,7 +19,3 @@ def novo_cliente(dados):
     session.commit()
 
     return f"Cliente {cliente_obj.nome} adicionado com sucesso!", 201
-
-@app.route('/kits')
-def kits():
-    return render_template('Kits.html')
