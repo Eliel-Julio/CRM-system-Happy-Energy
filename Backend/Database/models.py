@@ -6,7 +6,6 @@ Session = sessionmaker(bind=engine)
 session = Session()
 base = declarative_base()
 
-
 class kit(base):
     __tablename__ = 'kits'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -29,7 +28,7 @@ class cliente(base):
     __tablename__ = 'clientes'
     id = Column(Integer, primary_key=True, autoincrement=True)
     nome = Column(String, nullable=False)
-    cpf = Column(String, nullable=False, unique=True, maxlength=11, minlength=11)
+    cpf = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False)
     telefone = Column(String, nullable=False)
     cidade_UF = Column(String, nullable=False)
@@ -40,5 +39,20 @@ class cliente(base):
         self.email = email
         self.telefone = telefone
         self.cidade_UF = cidade_UF
+
+class proposta(base):
+    __tablename__ = 'propostas'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cliente_id = Column(Integer, ForeignKey('clientes.id'), nullable=False)
+    kit_id = Column(Integer, ForeignKey('kits.id'), nullable=False)
+    valor_total = Column(FLOAT, nullable=False)
+    
+    cliente = relationship("cliente")
+    kit = relationship("kit")
+    
+    def __init__(self, cliente_id, kit_id, valor_total):
+        self.cliente_id = cliente_id
+        self.kit_id = kit_id
+        self.valor_total = valor_total
 
 base.metadata.create_all(bind=engine)
