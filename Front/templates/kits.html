@@ -249,11 +249,10 @@
         const filterCategoria = document.getElementById('filterCategoria');
 
         // Adicionar novo kit
-        formNovoKit.addEventListener('submit', (e) => {
+        formNovoKit.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const novoKit = {
-                id: Date.now(),
                 nome: document.getElementById('nomeKit').value,
                 categoria: document.getElementById('categoriaKit').value,
                 potencia: parseFloat(document.getElementById('potenciaKit').value),
@@ -267,16 +266,36 @@
                 descricao: document.getElementById('descricaoKit').value
             };
 
-            kits.push(novoKit);
-            formNovoKit.reset();
-            renderizarKits();
-            
-            mostrarAlerta('Kit adicionado com sucesso!', 'success');
+            try {
+                const response = await fetch('http://127.0.0.1:5000/novo_kit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(novoKit)
+                });
+
+                const resultado = await response.json();
+
+                if (response.ok) {
+                    novoKit.id = Date.now();
+                    kits.push(novoKit);
+                    formNovoKit.reset();
+                    renderizarKits();
+                    mostrarAlerta('Kit adicionado com sucesso na base de dados!', 'success');
+                } else {
+                    mostrarAlerta('Erro: ' + resultado.error, 'danger');
+                }
+            } catch (erro) {
+                mostrarAlerta('Erro ao enviar dados: ' + erro.message, 'danger');
+                console.error('Erro:', erro);
+            }
         });
 
         // Renderizar kits
-        function renderizarKits() {
-            if (kits.length === 0) {
+        function renderizarKits(kitsParaRenderizar) {
+            if (kitsParaRenderizar.length === 0) {
+                console.log("debug", "Nenhum kit para renderizar");
                 kitsContainer.innerHTML = `
                     <div class="empty-state">
                         <i class="bi bi-inbox"></i>
@@ -286,8 +305,8 @@
                 `;
                 return;
             }
-
-            kitsContainer.innerHTML = kits.map(kit => `
+            console.log("debug", kitsParaRenderizar.length);
+            kitsContainer.innerHTML = kitsParaRenderizar.map(kit => `
                 <div class="kit-item">
                     <div class="kit-info">
                         <h5>${kit.nome} <span class="badge-custom">${kit.categoria}</span></h5>
@@ -305,36 +324,6 @@
                     </div>
                 </div>
             `).join('');
-        }
-
-        // Deletar kit
-        function deletarKit(id) {
-            if (confirm('Tem certeza que deseja deletar este kit?')) {
-                kits = kits.filter(kit => kit.id !== id);
-                renderizarKits();
-                mostrarAlerta('Kit deletado com sucesso!', 'info');
-            }
-        }
-
-        // Editar kit
-        function editarKit(id) {
-            const kit = kits.find(k => k.id === id);
-            if (kit) {
-                document.getElementById('nomeKit').value = kit.nome;
-                document.getElementById('categoriaKit').value = kit.categoria;
-                document.getElementById('potenciaKit').value = kit.potencia;
-                document.getElementById('numModulosKit').value = kit.numModulos;
-                document.getElementById('marcaModuloKit').value = kit.marcaModulo;
-                document.getElementById('modeloModuloKit').value = kit.modeloModulo;
-                document.getElementById('marcaInversorKit').value = kit.marcaInversor;
-                document.getElementById('modeloInversorKit').value = kit.modeloInversor;
-                document.getElementById('custoProcKit').value = kit.custoProd;
-                document.getElementById('precoVendaKit').value = kit.precoVenda;
-                document.getElementById('descricaoKit').value = kit.descricao;
-                
-                deletarKit(id);
-                document.getElementById('nomeKit').focus();
-            }
         }
 
         // Buscar e filtrar
@@ -399,7 +388,20 @@
         }
 
         // Renderizar na carga inicial
-        renderizarKits();
+        // const response = fetch('http://127.0.0.1:5000/get_kits');
+        // const kitslist = response.json();   
+        // console.log("debug kitslist", response);
+        fetch('http://127.0.0.1:5000/get_kits')
+            .then(res => res.json())
+            .then(data => {
+                kits = data.kits || [];
+                renderizarKits(kits);
+            })
+            .catch(erro => {
+                mostrarAlerta('Erro ao carregar kits: ' + erro.message, 'danger');
+                console.error('Erro:', erro);
+            })
+        
     </script>
 </body>
 </html>
