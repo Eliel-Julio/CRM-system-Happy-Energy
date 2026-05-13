@@ -1,7 +1,8 @@
 from backend import app
 from flask import render_template, request, jsonify
 from Database.models import *
-
+# from flask_cors import CORS
+# CORS(app)
 
 @app.route('/get_kits', methods=['GET'])
 def get_kits():
@@ -43,8 +44,8 @@ def novo_kit():
     
 @app.route('/editar_kit/<int:kit_id>', methods=['PUT'])
 def editar_kit(kit_id):
-    kit = session.query(kit).filter(kit.id == kit_id).first()
-    if not kit:
+    kit_ = session.query(kit).filter(kit.id == kit_id).first()
+    if not kit_:
         return jsonify({'error': 'Kit não encontrado'}), 404
 
     dados = request.get_json()
@@ -52,17 +53,17 @@ def editar_kit(kit_id):
         return jsonify({'error': 'Dados do kit não fornecidos'}), 400
 
     for attr, value in dados.items():
-        setattr(kit, attr, value)
+        setattr(kit_, attr, value)
 
     session.commit()
-    return jsonify({'success': True, 'message': f"Kit {kit.nome} atualizado com sucesso!"}), 200
+    return jsonify({'success': True, 'message': f"Kit {kit_.nome} atualizado com sucesso!"}), 200
 
 @app.route('/deletar_kit/<int:kit_id>', methods=['DELETE'])
 def deletar_kit(kit_id):
-    kit = session.query(kit).filter(kit.id == kit_id).first()
-    if not kit:
+    kit_ = session.query(kit).filter(kit.id == kit_id).first()
+    if not kit_:
         return jsonify({'error': 'Kit não encontrado'}), 404
 
-    session.delete(kit)
+    session.delete(kit_)
     session.commit()
-    return jsonify({'success': True, 'message': f"Kit {kit.nome} deletado com sucesso!"}), 200
+    return jsonify({'success': True, 'message': f"Kit {kit_.nome} deletado com sucesso!"}), 200
