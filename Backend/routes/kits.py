@@ -32,13 +32,37 @@ def novo_kit():
             inversor=True,
             p_modulos=dados.get('potencia', 0.0)
         )
-        print('-----------debug2-----------', kit_obj, kit_obj.nome)
     
         session.add(kit_obj)
         session.commit()
-        print('-----------debug3.1-----------')
 
         return jsonify({'success': True, 'message': f"Kit {kit_obj.nome} adicionado com sucesso!"}), 201
     except Exception as e:
         print('-----------debug3.2-----------')
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/editar_kit/<int:kit_id>', methods=['PUT'])
+def editar_kit(kit_id):
+    kit = session.query(kit).filter(kit.id == kit_id).first()
+    if not kit:
+        return jsonify({'error': 'Kit não encontrado'}), 404
+
+    dados = request.get_json()
+    if not dados:
+        return jsonify({'error': 'Dados do kit não fornecidos'}), 400
+
+    for attr, value in dados.items():
+        setattr(kit, attr, value)
+
+    session.commit()
+    return jsonify({'success': True, 'message': f"Kit {kit.nome} atualizado com sucesso!"}), 200
+
+@app.route('/deletar_kit/<int:kit_id>', methods=['DELETE'])
+def deletar_kit(kit_id):
+    kit = session.query(kit).filter(kit.id == kit_id).first()
+    if not kit:
+        return jsonify({'error': 'Kit não encontrado'}), 404
+
+    session.delete(kit)
+    session.commit()
+    return jsonify({'success': True, 'message': f"Kit {kit.nome} deletado com sucesso!"}), 200
