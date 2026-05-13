@@ -129,39 +129,12 @@
                             <input type="text" class="form-control" id="nomeKit" placeholder="Kit Solar 5kWp" required>
                         </div>
                         <div class="form-group-compact">
-                            <label for="categoriaKit" class="form-label">Categoria *</label>
-                            <select class="form-select" id="categoriaKit" required>
-                                <option value="">Selecione</option>
-                                <option value="solar">Solar</option>
-                                <option value="eolica">Eólica</option>
-                                <option value="hibrido">Híbrido</option>
-                                <option value="baterias">Baterias</option>
-                                <option value="outro">Outro</option>
-                            </select>
-                        </div>
-                        <div class="form-group-compact">
-                            <label for="potenciaKit" class="form-label">Potência (kWp) *</label>
-                            <input type="number" class="form-control" id="potenciaKit" step="0.1" placeholder="5.0" required>
-                        </div>
-
-                        <!-- Row 2: Módulos -->
-                        <div class="form-group-compact">
                             <label for="numModulosKit" class="form-label">Nº Módulos *</label>
                             <input type="number" class="form-control" id="numModulosKit" step="1" placeholder="10" required>
                         </div>
                         <div class="form-group-compact">
-                            <label for="marcaModuloKit" class="form-label">Marca Módulo *</label>
-                            <input type="text" class="form-control" id="marcaModuloKit" placeholder="Canadian Solar" required>
-                        </div>
-                        <div class="form-group-compact">
-                            <label for="modeloModuloKit" class="form-label">Modelo Módulo *</label>
-                            <input type="text" class="form-control" id="modeloModuloKit" placeholder="CS6K-270M" required>
-                        </div>
-
-                        <!-- Row 3: Inversor -->
-                        <div class="form-group-compact">
-                            <label for="marcaInversorKit" class="form-label">Marca Inversor *</label>
-                            <input type="text" class="form-control" id="marcaInversorKit" placeholder="Fronius" required>
+                            <label for="potenciaModulos" class="form-label">Potência Módulo (W) *</label>
+                            <input type="number" class="form-control" id="potenciaModulos" step="1" placeholder="270" required>
                         </div>
                         <div class="form-group-compact">
                             <label for="modeloInversorKit" class="form-label">Modelo Inversor *</label>
@@ -170,12 +143,6 @@
                         <div class="form-group-compact">
                             <label for="custoProcKit" class="form-label">Custo (R$) *</label>
                             <input type="number" class="form-control" id="custoProcKit" step="0.01" placeholder="0,00" required>
-                        </div>
-
-                        <!-- Row 4: Preço e Descrição -->
-                        <div class="form-group-compact">
-                            <label for="precoVendaKit" class="form-label">Preço Venda (R$) *</label>
-                            <input type="number" class="form-control" id="precoVendaKit" step="0.01" placeholder="0,00" required>
                         </div>
                         <div class="form-group-compact form-grid-full">
                             <label for="descricaoKit" class="form-label">Descrição</label>
@@ -254,16 +221,18 @@
             
             const novoKit = {
                 nome: document.getElementById('nomeKit').value,
-                categoria: document.getElementById('categoriaKit').value,
-                potencia: parseFloat(document.getElementById('potenciaKit').value),
                 numModulos: parseInt(document.getElementById('numModulosKit').value),
-                marcaModulo: document.getElementById('marcaModuloKit').value,
-                modeloModulo: document.getElementById('modeloModuloKit').value,
-                marcaInversor: document.getElementById('marcaInversorKit').value,
+                potenciaModulos: parseFloat(document.getElementById('potenciaModulos').value),
                 modeloInversor: document.getElementById('modeloInversorKit').value,
                 custoProd: parseFloat(document.getElementById('custoProcKit').value),
-                precoVenda: parseFloat(document.getElementById('precoVendaKit').value),
                 descricao: document.getElementById('descricaoKit').value
+
+                    // nome = Column(String, nullable=False)
+                    // n_modulos = Column(Integer, default=0)
+                    // p_modulos = Column(FLOAT, default=0.0)
+                    // inversor = Column(String, default=False)
+                    // preco_c = Column(FLOAT, nullable=False)
+                    // descricao = Column(String, nullable=False)
             };
 
             try {
@@ -290,6 +259,17 @@
                 mostrarAlerta('Erro ao enviar dados: ' + erro.message, 'danger');
                 console.error('Erro:', erro);
             }
+            fetch('http://127.0.0.1:5000/get_kits')
+                .then(res => res.json())
+                .then(data => {
+                    console.log("debug kits carregados", data);
+                    // console.log("debug kits carregados", kits);
+                    renderizarKits(data);
+                })
+                .catch(erro => {
+                    mostrarAlerta('Erro ao carregar kits: ' + erro.message, 'danger');
+                    console.error('Erro:', erro);
+                })
             
         });
 
@@ -311,8 +291,8 @@
                 <div class="kit-item">
                     <div class="kit-info">
                         <h5>${kit.nome}</h5>
-                        <p><strong>Potência:</strong> ${kit.p_modulos} W | <strong>Módulos:</strong> ${kit.n_modulos}x módulos</p>
-                        <p><strong>Inversor:</strong> ${kit.inversor} | <strong>Custo:</strong> R$ ${(kit.preco_c / 100).toFixed(2).replace('.', ',')}</p>
+                        <p><strong>Potência:</strong> ${kit.p_modulos} W | <strong>Módulos:</strong> ${kit.n_modulos} módulos</p>
+                        <p><strong>Inversor:</strong> ${kit.inversor} | <strong> preço de custo:</strong> R$ ${(kit.preco_c / 100).toFixed(2).replace('.', ',')}</p>
                         ${kit.descricao ? `<p><em>${kit.descricao}</em></p>` : ''}
                     </div>
                     <div class="kit-actions">
@@ -326,6 +306,13 @@
                 </div>
             `).join('');
             
+        }
+        function deletarKit(){
+            console.log("teste delet")
+        }
+
+        function editarKit(){
+            console.log("teste edit")
         }
 
         // Buscar e filtrar
