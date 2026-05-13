@@ -307,12 +307,57 @@
             `).join('');
             
         }
-        function deletarKit(){
+        function deletarKit(kitId){
             console.log("teste delet")
+            fetch("http://127.0.0.1:5000/deletar_kit/" + kitId, {
+                method: "DELETE"
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlerta(data.message, 'success');
+                    fetch('http://127.0.0.1:5000/get_kits')
+                        .then(res => res.json())
+                        .then(data => {
+                            renderizarKits(data);
+                        });
+                } else {
+                    mostrarAlerta('Erro: ' + data.error, 'danger');
+                }
+            })
+            .catch(erro => {
+                mostrarAlerta('Erro ao deletar kit: ' + erro.message, 'danger');
+                console.error('Erro:', erro);
+            });
         }
 
-        function editarKit(){
-            console.log("teste edit")
+        function editarKit(kitId){
+            fetch("http://127.0.0.1:5000/editar_kit/" + kitId, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    // Adicione os dados do kit aqui
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlerta(data.message, 'success');
+                    fetch('http://127.0.0.1:5000/get_kits')
+                        .then(res => res.json())
+                        .then(data => {
+                            renderizarKits(data);
+                        });
+                } else {
+                    mostrarAlerta('Erro: ' + data.error, 'danger');
+                }
+            })
+            .catch(erro => {
+                mostrarAlerta('Erro ao editar kit: ' + erro.message, 'danger');
+                console.error('Erro:', erro);
+            });
         }
 
         // Buscar e filtrar
