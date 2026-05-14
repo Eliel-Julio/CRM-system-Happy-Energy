@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Gerenciar Leads - Happy Energy</title>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-lightning-fill"></i> Happy Energy
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="bi bi-box"></i> Kits</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/leads"><i class="bi bi-people"></i> Leads</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/propostas"><i class="bi bi-file-earmark-text"></i> Propostas</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="container-fluid px-4 px-lg-5">
+        <div class="hero-section">
+            <div class="container">
+                <h1><i class="bi bi-person-bounding-box"></i> Gerenciar Leads</h1>
+                <p class="lead mb-0">Crie e organize seus leads para gerar propostas profissionais.</p>
+            </div>
+        </div>
+
+        <div class="container-lg">
+            <!-- Form Section: Adicionar Novo Kit -->
+            <div class="form-section">
+                <h3><i class="bi bi-plus-circle"></i> Novo lead</h3>
+                <form id="formNovoKit">
+                    <div class="form-grid-compact">
+                        <!-- Row 1: Informações Básicas -->
+                        <!-- nome = Column(String, nullable=False) -->
+                        <div class="form-group-compact">
+                            <label for="Nome-completo" class="form-label">Nome completo*</label>
+                            <input type="text" class="form-control" id="Nome-completo" placeholder="Nome do cliente" required>
+                        </div>
+                        <!-- cpf = Column(String, nullable=False, unique=True) -->
+                        <div class="form-group-compact">
+                            <label for="cpf" class="form-label">CPF *</label>
+                            <input type="text" inputmode="numeric" class="form-control" id="cpf" step="1" maxlength="14">
+                        </div>
+                        <!-- email = Column(String, nullable=False) -->
+                        <div class="form-group-compact">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" inputmode="email" class="form-control" id="email">
+                        </div>
+                        <!-- telefone = Column(String, nullable=False) -->
+                        <div class="form-group-compact">
+                            <label for="telefone" class="form-label">Telefone *</label>
+                            <input type="text" inputmode="tel" class="form-control" id="telefone" placeholder="(00) 00000-0000">
+                        </div>
+                        <!-- cidade_UF = Column(String, nullable=False) -->
+                        <div class="form-group-compact">
+                            <label for="Cidade-UF" class="form-label">Cidade-UF *</label>
+                            <input type="text" class="form-control" id="Cidade-UF" placeholder="Cidade, UF" required>
+                        </div>
+                        <div class="form-group-compact form-grid-full">
+                            <label for="descricaoKit" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="descricaoKit" rows="2" placeholder="Detalhes adicionais..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn-form-group">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus"></i> Adicionar
+                        </button>
+                        <button type="reset" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-clockwise"></i> Limpar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Kits List Section -->
+            <div class="section-card">
+                <div class="card-header">
+                    <h2><i class="bi bi-list-ul"></i> Listagem de Leads</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Filter and Search -->
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control form-control-sm" id="searchKit" placeholder="Buscar por nome...">
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-select form-select-sm" id="filterCategoria">
+                                <option value="">Todas as categorias</option>
+                                <option value="solar">Solar</option>
+                                <option value="eolica">Eólica</option>
+                                <option value="hibrido">Híbrido</option>
+                                <option value="baterias">Baterias</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="leadsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Happy Energy. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script>
+        // Gerenciamento de Kits
+        let kits = [];
+
+        const formNovoKit = document.getElementById('formNovoKit');
+        const leadsContainer = document.getElementById('leadsContainer');
+        const searchKit = document.getElementById('searchKit');
+        const filterCategoria = document.getElementById('filterCategoria');
+
+        // Adicionar novo kit
+        formNovoKit.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const novoKit = {
+                nome: document.getElementById('nomeKit').value,
+                numModulos: parseInt(document.getElementById('numModulosKit').value),
+                potenciaModulos: parseFloat(document.getElementById('potenciaModulos').value),
+                modeloInversor: document.getElementById('modeloInversorKit').value,
+                custoProd: parseFloat(document.getElementById('custoProcKit').value),
+                descricao: document.getElementById('descricaoKit').value
+
+                    // nome = Column(String, nullable=False)
+                    // n_modulos = Column(Integer, default=0)
+                    // p_modulos = Column(FLOAT, default=0.0)
+                    // inversor = Column(String, default=False)
+                    // preco_c = Column(FLOAT, nullable=False)
+                    // descricao = Column(String, nullable=False)
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/novo_kit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(novoKit)
+                });
+
+                const resultado = await response.json();
+
+                if (response.ok) {
+                    novoKit.id = Date.now();
+                    kits.push(novoKit);
+                    formNovoKit.reset();
+                    renderizarKits();
+                    mostrarAlerta('Kit adicionado com sucesso na base de dados!', 'success');
+                } else {
+                    mostrarAlerta('Erro: ' + resultado.error, 'danger');
+                }
+            } catch (erro) {
+                mostrarAlerta('Erro ao enviar dados: ' + erro.message, 'danger');
+                console.error('Erro:', erro);
+            }
+            fetch('http://127.0.0.1:5000/get_kits')
+                .then(res => res.json())
+                .then(data => {
+                    console.log("debug kits carregados", data);
+                    // console.log("debug kits carregados", kits);
+                    renderizarKits(data);
+                })
+                .catch(erro => {
+                    mostrarAlerta('Erro ao carregar kits: ' + erro.message, 'danger');
+                    console.error('Erro:', erro);
+                })
+            
+        });
+
+        // Renderizar leads
+        function renderizarLeads(leadsParaRenderizar) {
+            if (leadsParaRenderizar.length === 0) {
+                console.log("debug", "Nenhum lead para renderizar");
+                leadsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <h5>Nenhum lead cadastrado</h5>
+                        <p>Adicione seu primeiro lead usando o formulário acima</p>
+                    </div>
+                `;
+                return;
+            }
+            console.log("debug--", leadsParaRenderizar.length);
+            leadsContainer.innerHTML = leadsParaRenderizar.map(lead => `
+                <div class="kit-item">
+                    <div class="kit-info">
+                        <h5>${lead.nome}</h5>
+                        <p><strong>Email:</strong> ${lead.email}</p>
+                        <p><strong>Telefone:</strong> ${lead.telefone}</p>
+                        <p><strong>Cidade/UF:</strong> ${lead.cidade_UF}</p>
+                    </div>
+                    <div class="kit-actions">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editarLead(${lead.id})" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletarLead(${lead.id})" title="Deletar">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+        }
+        function deletarLead(leadId){
+            console.log("teste delet")
+            fetch("http://127.0.0.1:5000/deletar_lead/" + leadId, {
+                method: "DELETE"
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlerta(data.message, 'success');
+                    fetch('http://127.0.0.1:5000/get_leads')
+                        .then(res => res.json())
+                        .then(data => {
+                            renderizarKits(data);
+                        });
+                } else {
+                    mostrarAlerta('Erro: ' + data.error, 'danger');
+                }
+            })
+            .catch(erro => {
+                mostrarAlerta('Erro ao deletar lead: ' + erro.message, 'danger');
+                console.error('Erro:', erro);
+            });
+        }
+
+        function editarLead(leadId){
+            fetch("http://127.0.0.1:5000/editar_lead/" + leadId, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    // Adicione os dados do lead aqui
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlerta(data.message, 'success');
+                    fetch('http://127.0.0.1:5000/get_leads')
+                        .then(res => res.json())
+                        .then(data => {
+                            renderizarKits(data);
+                        });
+                } else {
+                    mostrarAlerta('Erro: ' + data.error, 'danger');
+                }
+            })
+            .catch(erro => {
+                mostrarAlerta('Erro ao editar lead: ' + erro.message, 'danger');
+                console.error('Erro:', erro);
+            });
+        }
+
+        // Buscar e filtrar
+        function filtrarKits() {
+            const busca = searchKit.value.toLowerCase();
+            const categoria = filterCategoria.value;
+
+            const kitsFiltrados = kits.filter(kit => {
+                const correspondeNome = kit.nome.toLowerCase().includes(busca);
+                const correspondeCategoria = !categoria || kit.categoria === categoria;
+                return correspondeNome && correspondeCategoria;
+            });
+
+            if (kitsFiltrados.length === 0) {
+                leadsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-search"></i>
+                        <h5>Nenhum kit encontrado</h5>
+                        <p>Tente ajustar seus filtros</p>
+                    </div>
+                `;
+                return;
+            }
+
+            leadsContainer.innerHTML = kitsFiltrados.map(kit => `
+                <div class="kit-item">
+                    <div class="kit-info">
+                        <h5>${kit.nome} <span class="badge-custom">${kit.categoria}</span></h5>
+                        <p><strong>Potência:</strong> ${kit.potencia} kWp | <strong>Módulos:</strong> ${kit.numModulos}x ${kit.marcaModulo}</p>
+                        <p><strong>Inversor:</strong> ${kit.marcaInversor} ${kit.modeloInversor} | <strong>Custo:</strong> R$ ${kit.custoProd.toFixed(2).replace('.', ',')}</p>
+                        <p><strong>Venda:</strong> R$ ${kit.precoVenda.toFixed(2).replace('.', ',')} ${kit.descricao ? `| <em>${kit.descricao}</em>` : ''}</p>
+                    </div>
+                    <div class="kit-actions">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editarKit(${kit.id})" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletarKit(${kit.id})" title="Deletar">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        searchKit.addEventListener('input', filtrarKits);
+        filterCategoria.addEventListener('change', filtrarKits);
+
+        // Mostrar alerta
+        function mostrarAlerta(mensagem, tipo = 'info') {
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+            alerta.role = 'alert';
+            alerta.innerHTML = `
+                ${mensagem}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.container-lg');
+            container.insertBefore(alerta, container.firstChild);
+            
+            setTimeout(() => alerta.remove(), 4000);
+        }
+
+        // Renderizar na carga inicial
+        // const response = fetch('http://127.0.0.1:5000/get_kits');
+        // const kitslist = response.json();   
+        // console.log("debug kitslist", response);
+        fetch('http://127.0.0.1:5000/get_leads')
+            .then(res => res.json())
+            .then(data => {
+                console.log("debug leads carregados", data);
+                // console.log("debug leads carregados", leads);
+                renderizarLeads(data);
+            })
+            .catch(erro => {
+                mostrarAlerta('Erro ao carregar Leads: ' + erro.message, 'danger');
+                console.error('Erro:', erro);
+            })
+        
+       
+    </script>
+</body>
+</html>

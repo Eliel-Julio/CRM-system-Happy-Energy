@@ -1,9 +1,14 @@
 from backend import app
-from flask import render_template
+from flask import render_template, request, jsonify
 from Database.models import *
 
-@app.route('/novo_cliente', methods=['POST'])
-def novo_cliente(dados):
+@app.route('/get_leads', methods=['GET'])
+def get_leads():
+    leads = session.query(cliente).all()
+    return jsonify([{'id': lead.id, 'nome': lead.nome, 'email': lead.email, 'telefone': lead.telefone, 'cidade_UF': lead.cidade_UF} for lead in leads])
+
+@app.route('/novo_lead', methods=['POST'])
+def novo_lead(dados):
     if not dados:
         return {'error': 'Dados do cliente não fornecidos'}, 400
 
