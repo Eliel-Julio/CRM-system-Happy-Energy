@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Gerenciar Leads - Happy Energy</title>
+    <style>
+    </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -21,10 +23,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#"><i class="bi bi-box"></i> Kits</a>
+                        <a class="nav-link active" href="/kits"><i class="bi bi-box"></i> Kits</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/leads"><i class="bi bi-people"></i> Leads</a>
+                        <a class="nav-link" href="#"><i class="bi bi-people"></i> Leads</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/propostas"><i class="bi bi-file-earmark-text"></i> Propostas</a>
@@ -44,10 +46,10 @@
         </div>
 
         <div class="container-lg">
-            <!-- Form Section: Adicionar Novo Kit -->
+            <!-- Form Section: Adicionar Novo lead -->
             <div class="form-section">
                 <h3><i class="bi bi-plus-circle"></i> Novo lead</h3>
-                <form id="formNovoKit">
+                <form id="formNovoLead">
                     <div class="form-grid-compact">
                         <!-- Row 1: Informações Básicas -->
                         <!-- nome = Column(String, nullable=False) -->
@@ -72,12 +74,12 @@
                         </div>
                         <!-- cidade_UF = Column(String, nullable=False) -->
                         <div class="form-group-compact">
-                            <label for="Cidade-UF" class="form-label">Cidade-UF *</label>
-                            <input type="text" class="form-control" id="Cidade-UF" placeholder="Cidade, UF" required>
+                            <label for="cidade-UF" class="form-label">Cidade-UF *</label>
+                            <input type="text" class="form-control" id="cidade-UF" placeholder="Cidade, UF" required>
                         </div>
                         <div class="form-group-compact form-grid-full">
-                            <label for="descricaoKit" class="form-label">Descrição</label>
-                            <textarea class="form-control" id="descricaoKit" rows="2" placeholder="Detalhes adicionais..."></textarea>
+                            <label for="descricaoLead" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="descricaoLead" rows="2" placeholder="Detalhes adicionais..."></textarea>
                         </div>
                     </div>
 
@@ -92,7 +94,7 @@
                 </form>
             </div>
 
-            <!-- Kits List Section -->
+            <!-- Leads List Section -->
             <div class="section-card">
                 <div class="card-header">
                     <h2><i class="bi bi-list-ul"></i> Listagem de Leads</h2>
@@ -101,7 +103,7 @@
                     <!-- Filter and Search -->
                     <div class="row g-2 mb-2">
                         <div class="col-md-6">
-                            <input type="text" class="form-control form-control-sm" id="searchKit" placeholder="Buscar por nome...">
+                            <input type="text" class="form-control form-control-sm" id="searchLead" placeholder="Buscar por nome...">
                         </div>
                         <div class="col-md-6">
                             <select class="form-select form-select-sm" id="filterCategoria">
@@ -129,51 +131,41 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script>
-        // Gerenciamento de Kits
-        let kits = [];
+        // Gerenciamento de Leads
+        let leads = [];
 
-        const formNovoKit = document.getElementById('formNovoKit');
+        const formNovoLead = document.getElementById('formNovoLead');
         const leadsContainer = document.getElementById('leadsContainer');
-        const searchKit = document.getElementById('searchKit');
+        const searchLead = document.getElementById('searchLead');
         const filterCategoria = document.getElementById('filterCategoria');
 
-        // Adicionar novo kit
-        formNovoKit.addEventListener('submit', async (e) => {
+        // Adicionar novo lead
+        formNovoLead.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const novoKit = {
-                nome: document.getElementById('nomeKit').value,
-                numModulos: parseInt(document.getElementById('numModulosKit').value),
-                potenciaModulos: parseFloat(document.getElementById('potenciaModulos').value),
-                modeloInversor: document.getElementById('modeloInversorKit').value,
-                custoProd: parseFloat(document.getElementById('custoProcKit').value),
-                descricao: document.getElementById('descricaoKit').value
-
-                    // nome = Column(String, nullable=False)
-                    // n_modulos = Column(Integer, default=0)
-                    // p_modulos = Column(FLOAT, default=0.0)
-                    // inversor = Column(String, default=False)
-                    // preco_c = Column(FLOAT, nullable=False)
-                    // descricao = Column(String, nullable=False)
+            const novoLead = {
+                nome: document.getElementById('Nome-completo').value,
+                cpf: document.getElementById('cpf').value,
+                email: document.getElementById('email').value,
+                telefone: document.getElementById('telefone').value,
+                cidade_UF: document.getElementById('cidade-UF').value
             };
-
             try {
-                const response = await fetch('http://127.0.0.1:5000/novo_kit', {
+                const response = await fetch('http://127.0.0.1:5000/novo_lead', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(novoKit)
+                    body: JSON.stringify(novoLead)
                 });
 
                 const resultado = await response.json();
 
                 if (response.ok) {
-                    novoKit.id = Date.now();
-                    kits.push(novoKit);
-                    formNovoKit.reset();
-                    renderizarKits();
-                    mostrarAlerta('Kit adicionado com sucesso na base de dados!', 'success');
+                    novoLead.id = Date.now();
+                    leads.push(novoLead);
+                    formNovoLead.reset();
+                    renderizarLeads();
+                    mostrarAlerta('Lead adicionado com sucesso na base de dados!', 'success');
                 } else {
                     mostrarAlerta('Erro: ' + resultado.error, 'danger');
                 }
@@ -181,19 +173,19 @@
                 mostrarAlerta('Erro ao enviar dados: ' + erro.message, 'danger');
                 console.error('Erro:', erro);
             }
-            fetch('http://127.0.0.1:5000/get_kits')
+            fetch('http://127.0.0.1:5000/get_leads')
                 .then(res => res.json())
                 .then(data => {
-                    console.log("debug kits carregados", data);
-                    // console.log("debug kits carregados", kits);
-                    renderizarKits(data);
+                    console.log("debug leads carregados", data);
+                    // console.log("debug leads carregados", leads);
+                    renderizarLeads(data);
                 })
                 .catch(erro => {
-                    mostrarAlerta('Erro ao carregar kits: ' + erro.message, 'danger');
+                    mostrarAlerta('Erro ao carregar leads: ' + erro.message, 'danger');
                     console.error('Erro:', erro);
                 })
-            
         });
+                
 
         // Renderizar leads
         function renderizarLeads(leadsParaRenderizar) {
@@ -210,14 +202,14 @@
             }
             console.log("debug--", leadsParaRenderizar.length);
             leadsContainer.innerHTML = leadsParaRenderizar.map(lead => `
-                <div class="kit-item">
-                    <div class="kit-info">
+                <div class="lead-item">
+                    <div class="lead-info">
                         <h5>${lead.nome}</h5>
                         <p><strong>Email:</strong> ${lead.email}</p>
                         <p><strong>Telefone:</strong> ${lead.telefone}</p>
                         <p><strong>Cidade/UF:</strong> ${lead.cidade_UF}</p>
                     </div>
-                    <div class="kit-actions">
+                    <div class="lead-actions">
                         <button class="btn btn-sm btn-outline-primary" onclick="editarLead(${lead.id})" title="Editar">
                             <i class="bi bi-pencil"></i>
                         </button>
@@ -241,7 +233,7 @@
                     fetch('http://127.0.0.1:5000/get_leads')
                         .then(res => res.json())
                         .then(data => {
-                            renderizarKits(data);
+                            renderizarLeads(data);
                         });
                 } else {
                     mostrarAlerta('Erro: ' + data.error, 'danger');
@@ -270,7 +262,7 @@
                     fetch('http://127.0.0.1:5000/get_leads')
                         .then(res => res.json())
                         .then(data => {
-                            renderizarKits(data);
+                            renderizarLeads(data);
                         });
                 } else {
                     mostrarAlerta('Erro: ' + data.error, 'danger');
@@ -283,49 +275,8 @@
         }
 
         // Buscar e filtrar
-        function filtrarKits() {
-            const busca = searchKit.value.toLowerCase();
-            const categoria = filterCategoria.value;
-
-            const kitsFiltrados = kits.filter(kit => {
-                const correspondeNome = kit.nome.toLowerCase().includes(busca);
-                const correspondeCategoria = !categoria || kit.categoria === categoria;
-                return correspondeNome && correspondeCategoria;
-            });
-
-            if (kitsFiltrados.length === 0) {
-                leadsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="bi bi-search"></i>
-                        <h5>Nenhum kit encontrado</h5>
-                        <p>Tente ajustar seus filtros</p>
-                    </div>
-                `;
-                return;
-            }
-
-            leadsContainer.innerHTML = kitsFiltrados.map(kit => `
-                <div class="kit-item">
-                    <div class="kit-info">
-                        <h5>${kit.nome} <span class="badge-custom">${kit.categoria}</span></h5>
-                        <p><strong>Potência:</strong> ${kit.potencia} kWp | <strong>Módulos:</strong> ${kit.numModulos}x ${kit.marcaModulo}</p>
-                        <p><strong>Inversor:</strong> ${kit.marcaInversor} ${kit.modeloInversor} | <strong>Custo:</strong> R$ ${kit.custoProd.toFixed(2).replace('.', ',')}</p>
-                        <p><strong>Venda:</strong> R$ ${kit.precoVenda.toFixed(2).replace('.', ',')} ${kit.descricao ? `| <em>${kit.descricao}</em>` : ''}</p>
-                    </div>
-                    <div class="kit-actions">
-                        <button class="btn btn-sm btn-outline-primary" onclick="editarKit(${kit.id})" title="Editar">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deletarKit(${kit.id})" title="Deletar">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        searchKit.addEventListener('input', filtrarKits);
-        filterCategoria.addEventListener('change', filtrarKits);
+        
+        
 
         // Mostrar alerta
         function mostrarAlerta(mensagem, tipo = 'info') {
@@ -340,13 +291,10 @@
             const container = document.querySelector('.container-lg');
             container.insertBefore(alerta, container.firstChild);
             
-            setTimeout(() => alerta.remove(), 4000);
+            setTimeout(() => alerta.remove(), 40000);
         }
 
         // Renderizar na carga inicial
-        // const response = fetch('http://127.0.0.1:5000/get_kits');
-        // const kitslist = response.json();   
-        // console.log("debug kitslist", response);
         fetch('http://127.0.0.1:5000/get_leads')
             .then(res => res.json())
             .then(data => {
