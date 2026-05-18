@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, FLOAT
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, FLOAT, JSON
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 engine = create_engine('sqlite:///Backend/Database/crm.db')
@@ -44,15 +44,32 @@ class proposta(base):
     __tablename__ = 'propostas'
     id = Column(Integer, primary_key=True, autoincrement=True)
     cliente_id = Column(Integer, ForeignKey('clientes.id'), nullable=False)
-    kit_id = Column(Integer, ForeignKey('kits.id'), nullable=False)
+    kit = Column(JSON, ForeignKey('kits.id'), nullable=False)
     valor_total = Column(FLOAT, nullable=False)
     
     cliente = relationship("cliente")
     kit = relationship("kit")
     
-    def __init__(self, cliente_id, kit_id, valor_total):
+    def __init__(self, cliente_id, kit_id):
         self.cliente_id = cliente_id
-        self.kit_id = kit_id
-        self.valor_total = valor_total
+        self.kit = self.kit_data(kit_id)
+        self.valor_total = self.Def_valor_total()
+
+    def Def_valor_total(self):
+        return (self.kit.preco_c + (self.kit.n_modulos * 60) + 350)*1.3*1.07
+
+    def kit_data(id):
+        kit = session.query(kit).filter_by(id=id).first()
+        if kit:
+            return {
+                "id": kit.id,
+                "nome": kit.nome,
+                "descricao": kit.descricao,
+                "preco_c": kit.preco_c,
+                "n_modulos": kit.n_modulos,
+                "p_modulos": kit.p_modulos,
+                "inversor": kit.inversor
+            }
+        return KeyError("Kit não encontrado")
 
 base.metadata.create_all(bind=engine)
