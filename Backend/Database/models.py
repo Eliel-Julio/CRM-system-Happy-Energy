@@ -22,9 +22,8 @@ class propriedade(base):
         return f"<Propriedade(nome='{self.nome}', valor='{self.valor}', tipo='{self.tipo}')>"
     
     def set_valor(self, valor):
-
         match self.tipo:
-            case 'float':                
+            case 'float':
                 try:
                     self.valor = float(valor)
                     return self.valor

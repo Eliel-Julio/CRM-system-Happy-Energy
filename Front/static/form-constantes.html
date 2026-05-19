@@ -1,0 +1,26 @@
+<form>
+    <div class="mb-3">
+        <label for="constante1" class="form-label">Constante 1</label>
+        <input type="text" class="form-control" id="constante1" name="constante1" placeholder="Valor da constante 1">
+    </div>
+</form>
+<script>
+    console.log('debug')
+    fetch('127.0.0.1:5000/get_propriedades')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('constante1').value = data.constante1 || '';
+            console.log('Propriedades carregadas:', data);
+            for (const prop in data) {
+                document.getElementsByTagName('form')[0].insertAdjacentHTML('beforeend', `
+                    <div class="mb-3">
+                        <label for="${prop}" class="form-label">${prop.replace(/_/g, ' ')}</label>
+                        <input type="text" class="form-control" id="${prop}" name="${prop}" placeholder="Valor de ${prop.replace(/_/g, ' ')}" value="${data[prop]}">
+                    </div>
+                `);
+            }
+        })
+        .catch(erro => {
+            console.error('Erro ao carregar propriedades:', erro);
+        });
+</script>

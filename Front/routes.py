@@ -18,6 +18,10 @@ def get_configs():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/configurações')
+def configuracoes():
+    return render_template('configurações.html')
+
 @app.route('/')
 def index():
     return render_template('index.html')
