@@ -1,10 +1,53 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, FLOAT, JSON
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, FLOAT, JSON, Enum
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-engine = create_engine('sqlite:///Backend/Database/crm.db')
+engine = create_engine('sqlite:///crm.db')
 Session = sessionmaker(bind=engine)
 session = Session()
 base = declarative_base()
+
+class propriedade(base):
+    __tablename__ = 'propriedades'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String, nullable=False)
+    valor = Column(String, nullable=False)
+    tipo = Column(Enum('float', 'int', 'str', 'boolean'), nullable=False)
+
+    def __init__(self, nome, valor, tipo):
+        self.nome = nome
+        self.tipo = tipo
+        self.set_valor(valor)
+
+    def __repr__(self):
+        return f"<Propriedade(nome='{self.nome}', valor='{self.valor}', tipo='{self.tipo}')>"
+    
+    def set_valor(self, valor):
+
+        match self.tipo:
+            case 'float':                
+                try:
+                    self.valor = float(valor)
+                    return self.valor
+                except ValueError:
+                    raise ValueError("Valor deve ser um número para tipo Float")
+            case 'int':                
+                try:
+                    self.valor = int(valor)
+                    return self.valor
+                except ValueError:
+                    raise ValueError("Valor deve ser um número para tipo Int")
+            case 'str':                
+                try:
+                    self.valor = str(valor)
+                    return self.valor
+                except ValueError:
+                    raise ValueError("Valor deve ser uma string para tipo Str")
+            case 'boolean':                
+                try:
+                    self.valor = bool(valor)
+                    return self.valor
+                except ValueError:
+                    raise ValueError("Valor deve ser um booleano para tipo Boolean")
 
 class kit(base):
     __tablename__ = 'kits'
@@ -44,32 +87,34 @@ class proposta(base):
     __tablename__ = 'propostas'
     id = Column(Integer, primary_key=True, autoincrement=True)
     cliente_id = Column(Integer, ForeignKey('clientes.id'), nullable=False)
-    kit = Column(JSON, ForeignKey('kits.id'), nullable=False)
+    kit = Column(JSON, nullable=False)
+    kit_id = Column(Integer, ForeignKey('kits.id'), nullable=False)
     valor_total = Column(FLOAT, nullable=False)
-    
+
     cliente = relationship("cliente")
     kit = relationship("kit")
-    
+
     def __init__(self, cliente_id, kit_id):
         self.cliente_id = cliente_id
         self.kit = self.kit_data(kit_id)
+        self.kit_id = kit_id
         self.valor_total = self.Def_valor_total()
 
     def Def_valor_total(self):
         return (self.kit.preco_c + (self.kit.n_modulos * 60) + 350)*1.3*1.07
 
     def kit_data(id):
-        kit = session.query(kit).filter_by(id=id).first()
-        if kit:
+        kit_ = session.query(kit).filter_by(id=id).first()
+        if kit_:
             return {
-                "id": kit.id,
-                "nome": kit.nome,
-                "descricao": kit.descricao,
-                "preco_c": kit.preco_c,
-                "n_modulos": kit.n_modulos,
-                "p_modulos": kit.p_modulos,
-                "inversor": kit.inversor
+                "id": kit_.id,
+                "nome": kit_.nome,
+                "descricao": kit_.descricao,
+                "preco_c": kit_.preco_c,
+                "n_modulos": kit_.n_modulos,
+                "p_modulos": kit_.p_modulos,
+                "inversor": kit_.inversor
             }
-        return KeyError("Kit não encontrado")
+        raise KeyError("Kit não encontrado")
 
 base.metadata.create_all(bind=engine)
