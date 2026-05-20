@@ -1,7 +1,10 @@
+from pathlib import Path
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, FLOAT, JSON, Enum
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-engine = create_engine('sqlite:///crm.db')
+# Garantir que o arquivo sqlite `crm.db` seja criado no mesmo diretório deste arquivo
+_db_file = Path(__file__).resolve().parent / "crm.db"
+engine = create_engine(f"sqlite:///{_db_file.as_posix()}")
 Session = sessionmaker(bind=engine)
 session = Session()
 base = declarative_base()

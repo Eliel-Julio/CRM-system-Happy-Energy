@@ -2,6 +2,7 @@ from app import app
 from flask import render_template, request, jsonify
 import json
 import os
+import requests
 
 @app.route('/get_configs', methods=['GET'])
 def get_configs():
@@ -20,7 +21,8 @@ def get_configs():
 
 @app.route('/configurações')
 def configuracoes():
-    return render_template('configurações.html')
+    req = requests.get('http://localhost:5000/get_propriedades') 
+    return render_template('configurações.html', data=get_configs().json, propriedades=req)
 
 @app.route('/')
 def index():

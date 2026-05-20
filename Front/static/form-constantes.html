@@ -1,26 +1,71 @@
 <form>
-    <div class="mb-3">
-        <label for="constante1" class="form-label">Constante 1</label>
-        <input type="text" class="form-control" id="constante1" name="constante1" placeholder="Valor da constante 1">
+    <div id="principal">
     </div>
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Nova Propriedade
+        </button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Nova Propriedade</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="nome-propriedade" class="form-label">Nome da Propriedade</label>
+          <input type="text" class="form-control" id="nome-propriedade" name="nome-propriedade" placeholder="Digite o nome da propriedade">
+        </div>
+        <div class="mb-3">
+            <label for="tipo-propriedade" class="form-label">Tipo da Propriedade</label>
+            <select type="text" class="form-control" id="tipo-propriedade" name="tipo-propriedade" placeholder="Digite o tipo da propriedade" onchange="
+                console.log('Tipo alterado para:', this.value)
+                const valorInput = document.getElementById('valor-propriedade');
+                switch (this.value) {
+                    case 'str':
+                        valorInput.type = 'text';
+                        valorInput.className = 'form-control';
+                        break;
+                    case 'int':
+                        valorInput.type = 'number';
+                        valorInput.className = 'form-control';
+                        valorInput.step = '1'; // Apenas números inteiros
+                        break;
+                    case 'float':
+                        valorInput.type = 'number';
+                        valorInput.className = 'form-control';
+                        valorInput.step = 'any'; // Permite números decimais
+                        break;
+                    case 'boolean':
+                        valorInput.type = 'checkbox';
+                        valorInput.className = 'form-check-input';
+                        valorInput.value = 'true'; // Valor padrão para checkbox
+                        break;
+                        default:
+                            valorInput.type = 'text';
+                            valorInput.className = 'form-control';
+                }
+            ">
+                <option value="">Selecione o tipo</option>
+                <option value="str">texto</option>
+                <option value="int">Numero Inteiro</option>
+                <option value="float">numero decimal</option>
+                <option value="boolean">verdadeiro/falso</option>
+            </select>
+        </div>
+        <div class="mb-3">
+          <label for="valor-propriedade" class="form-label">Valor da Propriedade</label>
+          <input type="text" class="form-control" id="valor-propriedade" name="valor-propriedade" placeholder="Digite o valor da propriedade">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 </form>
-<script>
-    console.log('debug')
-    fetch('127.0.0.1:5000/get_propriedades')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('constante1').value = data.constante1 || '';
-            console.log('Propriedades carregadas:', data);
-            for (const prop in data) {
-                document.getElementsByTagName('form')[0].insertAdjacentHTML('beforeend', `
-                    <div class="mb-3">
-                        <label for="${prop}" class="form-label">${prop.replace(/_/g, ' ')}</label>
-                        <input type="text" class="form-control" id="${prop}" name="${prop}" placeholder="Valor de ${prop.replace(/_/g, ' ')}" value="${data[prop]}">
-                    </div>
-                `);
-            }
-        })
-        .catch(erro => {
-            console.error('Erro ao carregar propriedades:', erro);
-        });
-</script>
