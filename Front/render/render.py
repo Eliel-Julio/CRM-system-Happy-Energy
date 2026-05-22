@@ -93,10 +93,31 @@ def render_proposta_p5(dados: dict, documento):
         documento.drawString(documento.stringWidth(rotulo, 'TrebuchetMS-Bold', 12)+CM, y, valor)
         y -= p_LINE_HEIGHT
 
-    y -= (p_LINE_HEIGHT-15-16.15*CM)
-    documento.drawImage(file_route("capacidade.png"), 15, y, width=16.15*CM, height=1.63*CM)
-    print("Dados do cliente renderizados com sucesso.")
-    documento.drawString(CM, y, "teste")
+    y -= (1.63*CM)
+    documento.drawImage(file_route("capacidade.png"), CM, y, width=16.15*CM, height=1.63*CM)
+    y-= p_LINE_HEIGHT*2
+    padding = 15
+    dados= [
+        ("Produção Média: ", f"{dados.get('producao_media', 'N/A')} kWh/mês"),
+        ("Área Total: ", f"{dados.get('area_total', 'N/A')} m²"),
+        ("Produção Anual: ", f"{dados.get('producao_anual', 'N/A')} kWh/ano"),
+        ("Potência do Sistema: ", f"{dados.get('potencia_kit', 'N/A')} kWp")] 
+    # space = A4[0]-2*padding - documento.stringWidth("PRODUÇÃO MÉDIAÁREA TOTALPRODUÇÃO ANUALPOTÊNCIA DO SISTEMA", 'TrebuchetMS-Bold', 12)
+    space_rotulo = A4[0]-2*padding - documento.stringWidth(dados[0][0]+dados[1][0]+dados[2][0]+dados[3][0], 'TrebuchetMS-Bold', 12)
+    gap_rotulos = space_rotulo / 8
+    x = padding+gap_rotulos
+    for rotulo, valor in dados:
+        
+        documento.setFont('TrebuchetMS-Bold', 12)
+        documento.drawString(x, y, rotulo)
+        
+        whidth_rotulo = documento.stringWidth(rotulo, 'TrebuchetMS-Bold', 13)
+        whidth_valor = documento.stringWidth(valor, 'TrebuchetMS', 10)
+        x_ = x + (whidth_rotulo/2) - (whidth_valor/2)
+        x+= whidth_rotulo+gap_rotulos*2
+        
+        documento.setFont('TrebuchetMS', 12)
+        documento.drawString(x_, y-p_LINE_HEIGHT, valor)
 
     return documento
 def render_proposta(dados: dict):
