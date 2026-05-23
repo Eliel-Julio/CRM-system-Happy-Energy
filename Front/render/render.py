@@ -6,7 +6,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Table, TableStyle, Image
 from reportlab.lib import colors
 from reportlab.lib.colors import HexColor   
-from reportlab.graphics.shapes import Drawing, String, Rect
+from reportlab.graphics.shapes import Drawing, String, Rect, Polygon
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.graphics.charts.lineplots import LinePlot
 from reportlab.graphics.widgets.markers import makeMarker
@@ -15,7 +15,8 @@ from reportlab.graphics.widgets.markers import makeMarker
 CM = 28.3464567
 p_LINE_HEIGHT = 20
 Amarelo_Happy = HexColor('#fbdc06')
-sheet_padding = 15
+sheet_padding_top = 15
+sheet_padding_left = 1*CM
 
 def file_route(filename: str, src_path: str='render/src/imagens'):
     if not filename:
@@ -90,7 +91,7 @@ def render_proposta_p5(dados: dict, documento):
     documento.showPage()
     
     # Imagem de dados do cliente
-    documento.drawImage(file_route("dados do cliente.png"), 15, A4[1]-(1.59*CM)-sheet_padding, width=8.94*CM, height=1.59*CM)
+    documento.drawImage(file_route("dados do cliente.png"), sheet_padding_left, A4[1]-(1.59*CM)-sheet_padding_top, width=8.94*CM, height=1.59*CM)
     
     dados_cliente = [
         ("Cliente: ", dados.get("nome_completo", "N/A")),
@@ -99,12 +100,12 @@ def render_proposta_p5(dados: dict, documento):
         ("Email: ", dados.get("email", "N/A")),
     ]
     
-    y = A4[1] - (1.59 * CM) - sheet_padding - 10 - p_LINE_HEIGHT
+    y = A4[1] - (1.59 * CM) - sheet_padding_top - 10 - p_LINE_HEIGHT
     for rotulo, valor in dados_cliente:
         documento.setFont('TrebuchetMS-Bold', 12)
-        documento.drawString(CM, y, rotulo)
+        documento.drawString(sheet_padding_left, y, rotulo)
         documento.setFont('TrebuchetMS', 12)
-        documento.drawString(documento.stringWidth(rotulo, 'TrebuchetMS-Bold', 12)+CM, y, valor)
+        documento.drawString(documento.stringWidth(rotulo, 'TrebuchetMS-Bold', 12)+sheet_padding_left, y, valor)
         y -= p_LINE_HEIGHT
 
     # Tabela de especificações do sistema
@@ -141,7 +142,7 @@ def render_proposta_p5(dados: dict, documento):
     tabela.drawOn(documento, A4[0]/2 - tabela_width/2, y)
     
     y -= (p_LINE_HEIGHT + tabela_height)
-    documento.drawImage(file_route("comparativo.png"), 15, y, width=15.5*CM, height=1.69*CM)
+    documento.drawImage(file_route("comparativo.png"), sheet_padding_left, y, width=15.5*CM, height=1.69*CM)
 
     meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
     consumo = [3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705]
@@ -199,8 +200,8 @@ def render_proposta_p5(dados: dict, documento):
 
 def render_proposta_p6(dados: dict, documento):
     documento.showPage()
-    y= A4[1] - 1.75*CM - sheet_padding
-    documento.drawImage(file_route("detalhes.png"), CM, y, width=12.12*CM, height=1.75*CM)
+    y= A4[1] - 1.75*CM - sheet_padding_top
+    documento.drawImage(file_route("detalhes.png"), sheet_padding_left, y, width=12.12*CM, height=1.75*CM)
 
     register_font(documento, font_name='TrebuchetMS.ttf', call='TrebuchetMS')
     register_font(documento, font_name='Trebuchet MS Bold.ttf', call='TrebuchetMS-Bold')
@@ -294,7 +295,7 @@ def render_proposta_p6(dados: dict, documento):
     tabela_.drawOn(documento, (A4[0] - tabela_width) / 2, y - tabela_height - 10)
 
     y -= (tabela_height + CM + 1.77*CM)
-    documento.drawImage(file_route("garantias.png"), CM, y, width=10.9*CM, height=1.77*CM)
+    documento.drawImage(file_route("garantias.png"), sheet_padding_left, y, width=10.9*CM, height=1.77*CM)
 
     garantias =[
         ['Painel',dados.get('garantia_painel', 'N/A'),'serviço', dados.get('garantia_servico', 'N/A')],
@@ -358,7 +359,7 @@ def render_grafico_investimento(dados: dict, documento, y=A4[1]):
     # -------------------------------------------------------------------------
     # CONFIGURAÇÃO DO GRÁFICO DE ÁREA
     # -------------------------------------------------------------------------
-    largura_desenho = 17.09 * CM
+    largura_desenho = 14 * CM
     altura_desenho = 7.5 * CM
     
     d = Drawing(largura_desenho, altura_desenho)
@@ -375,11 +376,11 @@ def render_grafico_investimento(dados: dict, documento, y=A4[1]):
     # --- Estilização da Linha e Preenchimento da Área ---
     lp.lines[0].strokeColor = Amarelo_Happy     # Linha Amarela/Ouro
     lp.lines[0].strokeWidth = 2.5
-    
+
     # ATENÇÃO: Para o fillColor funcionar como área no LinePlot do ReportLab,
-    # a propriedade de fechamento de polígono precisa estar ativa interna do componente,
-    # caso contrário ele só aceita o stroke.
-    lp.lines[0].fillColor = HexColor('#1A1A1A') 
+    # é necessário fechar o polígono da série. Aqui ativamos o fechamento
+    # e definimos um preenchimento semi-transparente para aparecer como área.
+    lp.lines[0].fillColor = colors.Color(26/255, 26/255, 26/255, alpha=0.15)
     
     # --- Configuração dos Marcadores (Pontos pretos com borda amarela nos nós) ---
     lp.lines[0].symbol = makeMarker('FilledCircle')
@@ -409,23 +410,57 @@ def render_grafico_investimento(dados: dict, documento, y=A4[1]):
     
     # --- Customização das Linhas de Grade (Grid) ---
     lp.xValueAxis.visibleGrid = 1
-    lp.xValueAxis.gridStrokeColor = HexColor('#E0E0E0')
+    lp.xValueAxis.gridStrokeColor = HexColor('#A1A1A1A')
     lp.xValueAxis.gridStrokeWidth = 0.5
     
     lp.yValueAxis.visibleGrid = 1
-    lp.yValueAxis.gridStrokeColor = HexColor('#E0E0E0')
+    lp.yValueAxis.gridStrokeColor = HexColor('#A1A1A1A')
     lp.yValueAxis.gridStrokeWidth = 0.5
 
     # -------------------------------------------------------------------------
-    # ADICIONANDO ELEMENTOS AO DRAWING (A ordem aqui resolve o sumiço!)
+    # ADICIONANDO ELEMENTOS AO DRAWING
+    # - Primeiro adicionamos a área preenchida (por baixo)
+    # - Depois adicionamos o LinePlot (linha fica por cima)
+    # - Por fim adicionamos a legenda
     # -------------------------------------------------------------------------
-    # 1. Primeiro adicionamos o gráfico (Background, linhas de grade, etc.)
+
+    # Construir polígono da área abaixo da curva (transforma dados em coordenadas do plot)
+    x_min = lp.xValueAxis.valueMin
+    x_max = lp.xValueAxis.valueMax
+    y_min = lp.yValueAxis.valueMin
+    y_max = lp.yValueAxis.valueMax
+
+    def to_plot_coords(xv, yv):
+        x_coord = lp.x + ((xv - x_min) / float(x_max - x_min)) * lp.width
+        y_coord = lp.y + ((yv - y_min) / float(y_max - y_min)) * lp.height
+        return x_coord, y_coord
+
+    pontos = [to_plot_coords(xv, yv) for xv, yv in dados_investimento]
+    if pontos:
+        # Baseline correspondente ao eixo X (valor 0) — se 0 estiver fora do
+        # intervalo do eixo Y, usamos o limite mais próximo do desenho.
+        zero_value = 0
+        if zero_value <= y_min:
+            baseline_y = lp.y
+        elif zero_value >= y_max:
+            baseline_y = lp.y + lp.height
+        else:
+            baseline_y = lp.y + ((zero_value - y_min) / float(y_max - y_min)) * lp.height
+
+        x_first = pontos[0][0]
+        x_last = pontos[-1][0]
+        poly_points = [(x_first, baseline_y)] + pontos + [(x_last, baseline_y)]
+        flat = [coord for p in poly_points for coord in p]
+        area = Polygon(flat, strokeColor=None, fillColor=HexColor('#1A1A1A'))
+        d.add(area)
+
+    # Adiciona o gráfico (linha) por cima da área
     d.add(lp)
-    
-    # 2. Depois adicionamos a legenda por cima de tudo
+
+    # Legenda por cima de tudo
     y_legenda = altura_desenho - 15
     x_legenda_centro = largura_desenho / 2
-    
+
     d.add(Rect(x_legenda_centro - 60, y_legenda, 25, 10, fillColor=HexColor('#1A1A1A'), strokeColor=Amarelo_Happy, strokeWidth=1.5))
     d.add(String(x_legenda_centro - 25, y_legenda + 1, "Investimento", fontSize=9, fontName="TrebuchetMS", textAnchor='start'))
     
@@ -466,8 +501,8 @@ def render_proposta_p7(dados: dict, documento):
     register_font(documento, font_name='TrebuchetMS.ttf', call='TrebuchetMS')
     register_font(documento, font_name='Trebuchet MS Bold.ttf', call='TrebuchetMS-Bold')
     documento.showPage()
-    y = A4[1] - 1.61*CM - sheet_padding
-    documento.drawImage(file_route("investimento.png"), CM, y, width=17.49*CM, height=1.61*CM)
+    y = A4[1] - 1.61*CM - sheet_padding_top
+    documento.drawImage(file_route("investimento.png"), sheet_padding_left, y, width=17.49*CM, height=1.61*CM)
     dados_investimento = [
         ('PREÇO DO SISTEMA INSTALADO', f"R$ {dados.get('valor_sistema', '0.00')}"),
         ('PRAZO DE INSTALAÇÃO', f"{dados.get('prazo_instalacao', '0')} Dias"),
@@ -479,14 +514,24 @@ def render_proposta_p7(dados: dict, documento):
     for rotulo, valor in dados_investimento:
         y -= p_LINE_HEIGHT
         documento.setFont('TrebuchetMS-Bold', 12)
-        documento.drawString(CM, y, rotulo)
+        documento.drawString(sheet_padding_left, y, rotulo)
         documento.setFont('TrebuchetMS', 12)
         documento.drawString(documento.stringWidth(rotulo, 'TrebuchetMS-Bold', 12)+CM, y, valor)
     y-= (p_LINE_HEIGHT *2 + 1.67*CM)
 
-    documento.drawImage(file_route("retorno.png"), CM, y, width=12.19*CM, height=1.67*CM)
+    documento.drawImage(file_route("retorno.png"), sheet_padding_left, y, width=12.19*CM, height=1.67*CM)
 
     documento = render_grafico_investimento(dados, documento,y=y)
+
+    return documento
+
+def render_proposta_p8(dados: dict, documento):
+    documento.showPage()
+    y = A4[1] - 1.67*CM - sheet_padding_top
+    documento.drawImage(file_route("analise.png"), sheet_padding_left, y, width=16.1*CM, height=1.67*CM)
+
+    ano = ['1|0.6', '2|1', '3|2', '4|3', '5|4', '6|5', '7|6', '8|7', '9|8', '10|9', '11|10', '12|11', '13|12', '14|13', '15|14', '16|15', '17|16', '18|17', '19|18', '20|19', '21|20', '22|21', '23|22', '24|23', '25|24']
+    energia_gerada = [dados.get('potencia_kit', 0) * 139 * 0.9919**i for i in range(1, 26)]
 
     return documento
 
@@ -499,6 +544,7 @@ def render_proposta(dados: dict):
     documento = render_proposta_p5(dados, documento)
     documento = render_proposta_p6(dados, documento)
     documento = render_proposta_p7(dados, documento)
+    documento = render_proposta_p8(dados, documento)
     return documento
 
 dados={"id": 1, "nome": "Proposta de Projeto", "descricao": "Descrição detalhada do projeto."}
