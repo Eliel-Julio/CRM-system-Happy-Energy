@@ -3,18 +3,19 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4 #(595.2755905511812, 841.8897637795277)
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import Table, TableStyle
+from reportlab.platypus import Table, TableStyle, Image
 from reportlab.lib import colors
 from reportlab.lib.colors import HexColor   
 from reportlab.graphics.shapes import Drawing, String, Rect
 from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.graphics.charts.lineplots import LinePlot
+from reportlab.graphics.widgets.markers import makeMarker
 
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
 
 CM = 28.3464567
 p_LINE_HEIGHT = 20
 Amarelo_Happy = HexColor('#fbdc06')
+sheet_padding = 15
 
 def file_route(filename: str, src_path: str='render/src/imagens'):
     if not filename:
@@ -89,7 +90,7 @@ def render_proposta_p5(dados: dict, documento):
     documento.showPage()
     
     # Imagem de dados do cliente
-    documento.drawImage(file_route("dados do cliente.png"), 15, A4[1]-(1.59*CM)-15, width=8.94*CM, height=1.59*CM)
+    documento.drawImage(file_route("dados do cliente.png"), 15, A4[1]-(1.59*CM)-sheet_padding, width=8.94*CM, height=1.59*CM)
     
     dados_cliente = [
         ("Cliente: ", dados.get("nome_completo", "N/A")),
@@ -98,7 +99,7 @@ def render_proposta_p5(dados: dict, documento):
         ("Email: ", dados.get("email", "N/A")),
     ]
     
-    y = A4[1] - (1.59 * CM) - 15 - 10 - p_LINE_HEIGHT
+    y = A4[1] - (1.59 * CM) - sheet_padding - 10 - p_LINE_HEIGHT
     for rotulo, valor in dados_cliente:
         documento.setFont('TrebuchetMS-Bold', 12)
         documento.drawString(CM, y, rotulo)
@@ -139,20 +140,13 @@ def render_proposta_p5(dados: dict, documento):
     y -= (tabela_height + 0)
     tabela.drawOn(documento, A4[0]/2 - tabela_width/2, y)
     
-    # Imagem comparativo
     y -= (p_LINE_HEIGHT + tabela_height)
     documento.drawImage(file_route("comparativo.png"), 15, y, width=15.5*CM, height=1.69*CM)
 
-    # -------------------------------------------------------------------------
-    # CONFIGURAÇÃO DOS DADOS DO GRÁFICO
-    # -------------------------------------------------------------------------
     meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
     consumo = [3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705]
     geracao = [4446, 4323, 4261, 3705, 3396, 3273, 3396, 3890, 4446, 4508, 4631, 4570]
     
-    # -------------------------------------------------------------------------
-    # CRIAÇÃO DO GRÁFICO (Ajustado para caber nos CM estipulados)
-    # -------------------------------------------------------------------------
     largura_desenho = 17.09 * CM
     altura_desenho = 8.0 * CM  
     
@@ -167,19 +161,16 @@ def render_proposta_p5(dados: dict, documento):
     bc.data = [consumo, geracao]
     bc.categoryAxis.categoryNames = meses
     
-    # Cores personalizadas
     bc.bars[0].fillColor = Amarelo_Happy
     bc.bars[1].fillColor = HexColor('#000000')
 
-    bc.bars[0].strokeColor = None  # Remove a borda da primeira série (Consumo)
-    bc.bars[1].strokeColor = None  # Remove a borda da segunda série (Geração)
+    bc.bars[0].strokeColor = None
+    bc.bars[1].strokeColor = None
     
-    # Configuração de escala do eixo Y
     bc.valueAxis.valueMin = 0
     bc.valueAxis.valueMax = 5000
     bc.valueAxis.valueStep = 1000
     
-    # Tipografia dos eixos (alterado para usar a sua fonte registrada)
     bc.categoryAxis.labels.fontName = 'TrebuchetMS'
     bc.categoryAxis.labels.fontSize = 8
     bc.categoryAxis.labels.dy = -10
@@ -187,9 +178,6 @@ def render_proposta_p5(dados: dict, documento):
     bc.valueAxis.labels.fontName = 'TrebuchetMS'
     bc.valueAxis.labels.fontSize = 8
     
-    # -------------------------------------------------------------------------
-    # LEGENDA DO GRÁFICO (Centralizada dinamicamente na parte superior)
-    # -------------------------------------------------------------------------
     y_legenda = altura_desenho - 15
     
     # Consumo
@@ -202,24 +190,315 @@ def render_proposta_p5(dados: dict, documento):
     
     d.add(bc)
     
-    # -------------------------------------------------------------------------
-    # DESENHANDO O GRÁFICO NO CANVAS
-    # -------------------------------------------------------------------------
-    # Atualiza a posição 'y' para desenhar o gráfico logo abaixo da última imagem
     y -= (altura_desenho + 20) 
     
-    # Centraliza o desenho horizontalmente na página A4
     x_centralizado = (A4[0] - largura_desenho) / 2
     d.drawOn(documento, x_centralizado, y)
 
     return documento
+
+def render_proposta_p6(dados: dict, documento):
+    documento.showPage()
+    y= A4[1] - 1.75*CM - sheet_padding
+    documento.drawImage(file_route("detalhes.png"), CM, y, width=12.12*CM, height=1.75*CM)
+
+    register_font(documento, font_name='TrebuchetMS.ttf', call='TrebuchetMS')
+    register_font(documento, font_name='Trebuchet MS Bold.ttf', call='TrebuchetMS-Bold')
+
+    # -------------------------------------------------------------------------
+    # ESTRUTURAÇÃO DOS DADOS DA TABELA
+    # -------------------------------------------------------------------------
+    # Buscando a imagem do inversor (substitua pelo caminho correto no seu projeto)
+    caminho_imagem = file_route("inversor weg.png") 
+    img_inversor = Image(caminho_imagem, width=2.5*CM, height=2.5*CM)
+
+    # Texto longo da descrição formatado com quebras de linha para a tabela respeitar
+    descricao_texto = (
+        "DESCRIÇÃO:\n"
+        f"{dados.get('qtd_modulos', '47')} MÓDULO FOTOVOLTAICO 615W - WEG BIFACIAL\n"
+        f"{dados.get('qtd_inversores', '01')} INVERSOR FOTOVOLTAICO SIW400G T020 W1, Trifásico 380V\n"
+        "ESTRUTURA DE FIXAÇÃO METÁLICA\n"
+        "KIT COMPLETO DE INSTALAÇÃO"
+    )
+
+    # Matriz da tabela (3 linhas x 3 colunas)
+    dados_tabela = [
+        # Linha 0: Cabeçalho
+        ['ITEM', 'QUANTIDADE', 'IMAGEM'],
+        # Linha 1: Dados principais do Kit
+        [f"KIT {dados.get('potencia_kit', '--.--')} kwp WEG metálico", "1", img_inversor],
+        # Linhas 2: Reservada para a descrição longa expandida (via SPAN)
+        [descricao_texto, '', '']
+    ]
+
+    # Larguras das colunas somando exatamente 17.09 CM (para alinhar com o seu gráfico)
+    largura_colunas = [9.5*CM, 3.5*CM, 4.09*CM]
+
+    tabela = Table(dados_tabela, colWidths=largura_colunas)
+    tabela.setStyle(TableStyle([
+        # --- Configurações do Cabeçalho (Linha 0) ---
+        ('BACKGROUND', (0, 0), (-1, 0), HexColor("#BBBBBB")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#1A1A1A')),
+        ('FONTNAME', (0, 0), (-1, 0), 'TrebuchetMS-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 11),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('TOPPADDING', (0, 0), (-1, 0), 8),
+
+        # --- Linha Cinza Clara do Kit (Linha 1) ---
+        ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#EAEAEA')),
+        ('TEXTCOLOR', (0, 1), (1, 1), colors.HexColor('#222222')),
+        ('FONTNAME', (0, 1), (1, 1), 'TrebuchetMS'),
+        ('FONTSIZE', (0, 1), (1, 1), 11),
+        ('ALIGN', (0, 1), (0, 1), 'LEFT'),      # Texto do kit à esquerda
+        ('ALIGN', (1, 1), (1, 1), 'CENTER'),    # Quantidade no centro
+        ('ALIGN', (2, 1), (2, 1), 'CENTER'),    # Imagem no centro
+        ('VALIGN', (0, 1), (-1, 1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 1), (0, 1), 15),    # Margem interna pro texto não colar na borda
+        ('TOPPADDING', (0, 1), (-1, 1), 12),
+        ('BOTTOMPADDING', (0, 1), (-1, 1), 12),
+
+        # --- Bloco de Descrição com Mesclagem (Linha 2) ---
+        # SPAN mescla da coluna 0 até a coluna 2 na linha 2
+        ('SPAN', (0, 2), (2, 2)), 
+        ('BACKGROUND', (0, 2), (-1, 2), colors.HexColor('#F5F5F5')),
+        ('TEXTCOLOR', (0, 2), (-1, 2), colors.HexColor('#1A1A1A')),
+        ('FONTNAME', (0, 2), (-1, 2), 'TrebuchetMS'),
+        ('FONTSIZE', (0, 2), (-1, 2), 10.5),
+        ('ALIGN', (0, 2), (-1, 2), 'LEFT'),
+        ('VALIGN', (0, 2), (-1, 2), 'TOP'),
+        ('LEFTPADDING', (0, 2), (-1, 2), 20),
+        ('TOPPADDING', (0, 2), (-1, 2), 20),
+        ('BOTTOMPADDING', (0, 2), (-1, 2), 20),
+
+        # --- Linhas Divisórias Brancas ---
+        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.white), # Linha grossa branca abaixo do cabeçalho
+        ('LINEBELOW', (0, 1), (-1, 1), 2, colors.white), # Linha grossa branca abaixo do item
+    ]))
+
+    tabela_width, tabela_height = tabela.wrap(0, 0)
+    
+    y -= tabela_height + 20 
+    
+    tabela.drawOn(documento, (A4[0] - tabela_width) / 2, y)
+
+    tabela_=Table([[f"Valor total: R$ {dados.get('valor', '0.00')}"]], colWidths=[A4[0]-3*CM])
+    tabela_.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), HexColor("#000000")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#fbfbfb')),
+        
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, -1), 'TrebuchetMS-Bold'),]))
+    tabela_width, tabela_height = tabela_.wrap(0, 0)
+    tabela_.drawOn(documento, (A4[0] - tabela_width) / 2, y - tabela_height - 10)
+
+    y -= (tabela_height + CM + 1.77*CM)
+    documento.drawImage(file_route("garantias.png"), CM, y, width=10.9*CM, height=1.77*CM)
+
+    garantias =[
+        ['Painel',dados.get('garantia_painel', 'N/A'),'serviço', dados.get('garantia_servico', 'N/A')],
+        # [None,None,None,None],
+        ['Inversor',dados.get('garantia_inversor', 'N/A'),'Estrutura', dados.get('garantia_estrutura', 'N/A')]
+    ]
+
+    tabela_garantias = Table(garantias, colWidths=[4.5*CM, 3.5*CM, 4.5*CM, 3.5*CM])
+
+    tabela_garantias.setStyle(TableStyle([
+    ('LINEBELOW', (0, 0), (-1, 0), 12, colors.white), 
+
+    # --- Estilização dos Blocos Pretos (Coluna 0 e Coluna 2) ---
+    ('BACKGROUND', (0, 0), (0, -1), HexColor("#1A1A1A")), 
+    ('BACKGROUND', (2, 0), (2, -1), HexColor("#1A1A1A")), 
+    ('TEXTCOLOR', (0, 0), (0, -1), colors.white),
+    ('TEXTCOLOR', (2, 0), (2, -1), colors.white),
+    ('FONTNAME', (0, 0), (0, -1), 'TrebuchetMS-Bold'),
+    ('FONTNAME', (2, 0), (2, -1), 'TrebuchetMS-Bold'),
+    ('FONTSIZE', (0, 0), (0, -1), 10),
+    ('FONTSIZE', (2, 0), (2, -1), 10),
+    ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+    ('ALIGN', (2, 0), (2, -1), 'LEFT'),
+    ('LEFTPADDING', (0, 0), (0, -1), 10),
+    ('LEFTPADDING', (2, 0), (2, -1), 10),
+
+    # --- Estilização dos Prazos (Coluna 1 e Coluna 3) ---
+    ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#000000')),
+    ('TEXTCOLOR', (3, 0), (3, -1), colors.HexColor('#000000')),
+    ('FONTNAME', (1, 0), (1, -1), 'TrebuchetMS'),
+    ('FONTNAME', (3, 0), (3, -1), 'TrebuchetMS'),
+    ('FONTSIZE', (1, 0), (1, -1), 11),
+    ('FONTSIZE', (3, 0), (3, -1), 11),
+    ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+    ('ALIGN', (3, 0), (3, -1), 'CENTER'),
+
+    # --- Ajustes Gerais de Altura Interna ---
+    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ('TOPPADDING', (0, 0), (-1, -1), 8),    
+    ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+]))
+    tabela_width, tabela_height = tabela_garantias.wrap(0, 0)
+    # print(f"Tabela de garantias: {tabela_width} x {tabela_height}")
+    tabela_garantias.drawOn(documento, (A4[0] - tabela_width) / 2, y - tabela_height - 10)
+
+    return documento
+
+def render_grafico_investimento(dados: dict, documento, y=A4[1]):
+    # Usando a variável global de controle de altura 'y' que você já possui no seu fluxo
+    
+    # -------------------------------------------------------------------------
+    # ESTRUTURAÇÃO DOS DADOS (X, Y)
+    # -------------------------------------------------------------------------
+    dados_investimento = []
+    valor_acumulado = 0
+    for ano in range(1, 26):
+        # Cria uma curva exponencial suave simulando a imagem
+        valor_acumulado += 5000 + (ano * 1300) 
+        dados_investimento.append((ano, valor_acumulado))
+
+    # -------------------------------------------------------------------------
+    # CONFIGURAÇÃO DO GRÁFICO DE ÁREA
+    # -------------------------------------------------------------------------
+    largura_desenho = 17.09 * CM
+    altura_desenho = 7.5 * CM
+    
+    d = Drawing(largura_desenho, altura_desenho)
+    
+    lp = LinePlot()
+    lp.x = 55                   # Margem esquerda maior para os valores não cortarem
+    lp.y = 40                   # Espaço inferior para os números inclinados do eixo X
+    lp.width = largura_desenho - 75
+    lp.height = altura_desenho - 75
+    
+    # Injeta os dados dentro de uma lista de séries
+    lp.data = [dados_investimento]
+    
+    # --- Estilização da Linha e Preenchimento da Área ---
+    lp.lines[0].strokeColor = Amarelo_Happy     # Linha Amarela/Ouro
+    lp.lines[0].strokeWidth = 2.5
+    
+    # ATENÇÃO: Para o fillColor funcionar como área no LinePlot do ReportLab,
+    # a propriedade de fechamento de polígono precisa estar ativa interna do componente,
+    # caso contrário ele só aceita o stroke.
+    lp.lines[0].fillColor = HexColor('#1A1A1A') 
+    
+    # --- Configuração dos Marcadores (Pontos pretos com borda amarela nos nós) ---
+    lp.lines[0].symbol = makeMarker('FilledCircle')
+    lp.lines[0].symbol.size = 4                             # Ajustado para 4 para ficar mais sutil
+    lp.lines[0].symbol.fillColor = HexColor('#1A1A1A')   # Miolo preto
+    lp.lines[0].symbol.strokeColor = Amarelo_Happy          # Borda amarela
+    lp.lines[0].symbol.strokeWidth = 1
+    
+    # --- Configuração do Eixo X (Anos de 1 a 25) ---
+    lp.xValueAxis.valueMin = 1
+    lp.xValueAxis.valueMax = 25
+    lp.xValueAxis.valueStep = 1
+    lp.xValueAxis.labels.fontName = 'TrebuchetMS'
+    lp.xValueAxis.labels.fontSize = 8
+    lp.xValueAxis.labels.dy = -15
+    lp.xValueAxis.labels.angle = 45                  # Inclina os números em 45 graus
+    
+    # --- Configuração do Eixo Y (Valores de -100k a 600k) ---
+    lp.yValueAxis.valueMin = -100000
+    lp.yValueAxis.valueMax = 600000
+    lp.yValueAxis.valueStep = 100000
+    lp.yValueAxis.labels.fontName = 'TrebuchetMS'
+    lp.yValueAxis.labels.fontSize = 8
+    lp.yValueAxis.labels.rightPadding = 5
+    # Formata o Eixo Y para exibir de forma limpa (Ex: 500k ou formato padrão)
+    lp.yValueAxis.labelTextFormat = '%d' 
+    
+    # --- Customização das Linhas de Grade (Grid) ---
+    lp.xValueAxis.visibleGrid = 1
+    lp.xValueAxis.gridStrokeColor = HexColor('#E0E0E0')
+    lp.xValueAxis.gridStrokeWidth = 0.5
+    
+    lp.yValueAxis.visibleGrid = 1
+    lp.yValueAxis.gridStrokeColor = HexColor('#E0E0E0')
+    lp.yValueAxis.gridStrokeWidth = 0.5
+
+    # -------------------------------------------------------------------------
+    # ADICIONANDO ELEMENTOS AO DRAWING (A ordem aqui resolve o sumiço!)
+    # -------------------------------------------------------------------------
+    # 1. Primeiro adicionamos o gráfico (Background, linhas de grade, etc.)
+    d.add(lp)
+    
+    # 2. Depois adicionamos a legenda por cima de tudo
+    y_legenda = altura_desenho - 15
+    x_legenda_centro = largura_desenho / 2
+    
+    d.add(Rect(x_legenda_centro - 60, y_legenda, 25, 10, fillColor=HexColor('#1A1A1A'), strokeColor=Amarelo_Happy, strokeWidth=1.5))
+    d.add(String(x_legenda_centro - 25, y_legenda + 1, "Investimento", fontSize=9, fontName="TrebuchetMS", textAnchor='start'))
+    
+    # Desenha o gráfico no canvas
+    y -= altura_desenho
+    d.drawOn(documento, (A4[0] - largura_desenho) / 2, y)
+
+    # -------------------------------------------------------------------------
+    # TABELA INFERIOR DE RESUMO (Tempo de Retorno vs Economia)
+    # -------------------------------------------------------------------------
+    dados_resumo = [
+        ["Tempo de retorno do investimento: 1\nANO E 3 MESES", f"Economia em 25 anos:\nR$ {dados.get('economia_total', '2.923.079,68')}"]
+    ]
+    
+    largura_tabela_resumo = [largura_desenho / 2, largura_desenho / 2]
+    tabela_resumo = Table(dados_resumo, colWidths=largura_tabela_resumo)
+    
+    tabela_resumo.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), HexColor('#EAEAEA')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), HexColor('#000000')),
+        ('FONTNAME', (0, 0), (-1, -1), 'TrebuchetMS-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LINEBEFORE', (1, 0), (1, -1), 1.5, colors.white), # Linha divisória branca no centro
+    ]))
+    
+    t_width, t_height = tabela_resumo.wrap(0, 0)
+    y -= (t_height + 5)
+    tabela_resumo.drawOn(documento, (A4[0] - t_width) / 2, y)
+    
+    # Retorna o y atualizado para o seu fluxo não sobrepor os próximos elementos do PDF
+    return documento
+
+def render_proposta_p7(dados: dict, documento):
+    register_font(documento, font_name='TrebuchetMS.ttf', call='TrebuchetMS')
+    register_font(documento, font_name='Trebuchet MS Bold.ttf', call='TrebuchetMS-Bold')
+    documento.showPage()
+    y = A4[1] - 1.61*CM - sheet_padding
+    documento.drawImage(file_route("investimento.png"), CM, y, width=17.49*CM, height=1.61*CM)
+    dados_investimento = [
+        ('PREÇO DO SISTEMA INSTALADO', f"R$ {dados.get('valor_sistema', '0.00')}"),
+        ('PRAZO DE INSTALAÇÃO', f"{dados.get('prazo_instalacao', '0')} Dias"),
+        ('FORMA DE PAGAMENTO', dados.get('forma_pagamento', 'N/A')),
+        ('CONDIÇÃO DE PAGAMENTO', dados.get('condicao_pagamento', 'N/A')),
+        ('RETORNO DO INVESTIMENTO', dados.get('retorno_investimento', 'N/A'))
+    ]
+
+    for rotulo, valor in dados_investimento:
+        y -= p_LINE_HEIGHT
+        documento.setFont('TrebuchetMS-Bold', 12)
+        documento.drawString(CM, y, rotulo)
+        documento.setFont('TrebuchetMS', 12)
+        documento.drawString(documento.stringWidth(rotulo, 'TrebuchetMS-Bold', 12)+CM, y, valor)
+    y-= (p_LINE_HEIGHT *2 + 1.67*CM)
+
+    documento.drawImage(file_route("retorno.png"), CM, y, width=12.19*CM, height=1.67*CM)
+
+    documento = render_grafico_investimento(dados, documento,y=y)
+
+    return documento
+
 def render_proposta(dados: dict):
     documento = canvas.Canvas(f"proposta_{dados['id']}.pdf", pagesize=A4)
-    # documento = render_proposta_p1(dados, documento)
-    # documento = render_proposta_p2(dados, documento)
-    # documento = render_proposta_p3(dados, documento)
-    # documento = render_proposta_p4(dados, documento)
+    documento = render_proposta_p1(dados, documento)
+    documento = render_proposta_p2(dados, documento)
+    documento = render_proposta_p3(dados, documento)
+    documento = render_proposta_p4(dados, documento)
     documento = render_proposta_p5(dados, documento)
+    documento = render_proposta_p6(dados, documento)
+    documento = render_proposta_p7(dados, documento)
     return documento
 
 dados={"id": 1, "nome": "Proposta de Projeto", "descricao": "Descrição detalhada do projeto."}
