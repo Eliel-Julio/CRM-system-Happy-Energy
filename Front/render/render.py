@@ -10,6 +10,9 @@ from reportlab.graphics.shapes import Drawing, String, Rect, Polygon
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.graphics.charts.lineplots import LinePlot
 from reportlab.graphics.widgets.markers import makeMarker
+from reportlab.graphics import renderPDF
+
+from reportlab.graphics.charts.barcharts import HorizontalBarChart
 
 
 CM = 28.3464567
@@ -636,6 +639,105 @@ def render_proposta_p8(dados: dict, documento):
     comparatvo.drawOn(documento, (A4[0] - comparativo_width) / 2, y)
     return documento
 
+def render_grafico_comparativo(dados: dict, documento, y):
+    # --- Configurações de Dados Baseadas na Imagem ---
+    # Se os dados não vierem do dicionário, assume estes padrões:
+    labels = dados.get('labels', ['Energia Solar (16.42%)', 'CDI (1.13%)', 'Poupança (0.63%)'])
+    valores = dados.get('valores', [16.42, 1.13, 0.63])
+    
+    cor_preto = HexColor('#1A1A1A')
+    cores_barras = [Amarelo_Happy, cor_preto, cor_preto] 
+
+    largura_container, altura_container = 18.36 * CM, 7.0 * CM
+    
+    grafico_container = Drawing(largura_container, altura_container)
+    
+    # 2. Inicializa o gráfico de barras horizontais
+    bc = HorizontalBarChart()
+    bc.x = 4.5 * CM       # Recuo à esquerda para acomodar os textos longos dos labels
+    bc.y = 0.5 * CM       # Recuo inferior para não cortar os números do eixo X
+    bc.height = 5.5 * CM  # Altura útil da área do gráfico
+    bc.width = 12.5 * CM  # Largura útil da área do gráfico
+    
+    # Injeta os dados (precisa ser uma lista de listas para o ReportLab)
+    bc.data = [valores]
+    
+    # --- Customização das Barras e Cores ---
+    bc.barSpacing = 10     # Espaçamento entre as barras
+    for idx, cor in enumerate(cores_barras):
+        bc.bars[0, idx].fillColor = cor
+        bc.bars[0, idx].strokeColor = None # Remove bordas para ficar flat como na imagem
+
+    # --- Configuração do Eixo Y (Categorias/Labels à esquerda) ---
+    bc.categoryAxis.categoryNames = labels
+    bc.categoryAxis.labels.fontName = 'TrebuchetMS'
+    bc.categoryAxis.labels.fontSize = 9
+    bc.categoryAxis.labels.boxAnchor = 'e'  # Alinha o texto à direita (encostado no eixo)
+    bc.categoryAxis.labels.dx = -10         # Afasta um pouco o texto da linha do eixo
+
+    # --- Configuração do Eixo X (Valores/Escala abaixo) ---
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 18
+    bc.valueAxis.valueStep = 2
+    bc.valueAxis.labels.fontName = 'TrebuchetMS'
+    bc.valueAxis.labels.fontSize = 9
+    bc.valueAxis.labels.dy = -10            # Empurra os números um pouco para baixo da linha
+
+    # 3. Adiciona o componente gráfico ao Drawing
+    grafico_container.add(bc)
+    
+    # 4. Calcula a posição Y na página e renderiza o gráfico no canvas (documento)
+    # Posiciona logo abaixo da imagem do título, dando uma margem de segurança
+    y_posicao_grafico = y - altura_container - (0.5 * CM)
+    
+    # IMPORTANTE: sheet_padding_left deve estar acessível no seu escopo global ou passado por parâmetro
+    # Aqui assumirei que está definido ou você pode passar diretamente.
+    renderPDF.draw(grafico_container, documento, 1.5 * CM, y_posicao_grafico)
+    
+    return documento, altura_container
+
+def render_proposta_p9(dados: dict, documento):
+    documento.showPage()
+    register_font(documento, font_name='TrebuchetMS.ttf', call='TrebuchetMS')
+    register_font(documento, font_name='Trebuchet MS Bold.ttf', call='TrebuchetMS-Bold')
+    y = A4[1] - 1.79*CM - sheet_padding_top
+    documento.drawImage(file_route("comparativo_m.png"), sheet_padding_left, y, width=18.36*CM, height=1.79*CM)
+
+    documento, altura_grafico = render_grafico_comparativo(dados, documento, y)
+
+    y-= (1.82*CM + p_LINE_HEIGHT + altura_grafico)
+    documento.drawImage(file_route("contribuindo.png"), sheet_padding_left, y, width=16.77*CM, height=1.82*CM)
+
+    img_arvores = Image("arvore.png", width=2.17*CM, height=2.17*CM)
+    img_co2 = Image("arvore.png", width=2.17*CM, height=2.17*CM)
+    img_carros = Image("carro.png", width=2.17*CM, height=2.17*CM)
+    dados_tabela=[[img_co2,"REDUÇÃO DE CO²","78 t"],
+                  [img_arvores,"ÁRVORES SALVAS","2.112 Árvores"],
+                  [img_carros,"REDUÇÃO DE EMISSÃO DE GASES POR CARROS","520.000 km/h"]
+                  ]
+    tabela = Table(dados_tabela, colWidths=[A4[0]-3*CM])
+
+    tabela.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), HexColor('#f1f1f1')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+        ('FONTNAME', (0, 0), (-1, -1), 'TrebuchetMS-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),]))
+    
+    tabela_width, tabela_height = tabela.wrap(0, 0)
+    y -= (tabela_height + 10)
+    tabela.drawOn(documento, (A4[0] - tabela_width) / 2, y)
+    
+    return documento
+
+def render_proposta_p10(dados: dict, documento):
+    documento.showPage()
+    register_font(documento, font_name='TrebuchetMS.ttf', call='TrebuchetMS')
+    register_font(documento, font_name='Trebuchet MS Bold.ttf', call='TrebuchetMS-Bold')
+    y = A4[1] - 1.75*CM - sheet_padding_top
+    documento.drawImage(file_route("comparativo.png"), sheet_padding_left, y, width=18.36*CM, height=1.75*CM)
+    return documento
+
 def render_proposta(dados: dict):
     documento = canvas.Canvas(f"proposta_{dados['id']}.pdf", pagesize=A4)
     documento = render_proposta_p1(dados, documento)
@@ -646,6 +748,8 @@ def render_proposta(dados: dict):
     documento = render_proposta_p6(dados, documento)
     documento = render_proposta_p7(dados, documento)
     documento = render_proposta_p8(dados, documento)
+    documento = render_proposta_p9(dados, documento)
+    documento = render_proposta_p10(dados, documento)
     return documento
 
 dados={"id": 1, "nome": "Proposta de Projeto", "descricao": "Descrição detalhada do projeto."}
