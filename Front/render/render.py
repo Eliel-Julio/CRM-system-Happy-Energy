@@ -15,7 +15,7 @@ from reportlab.graphics.widgets.markers import makeMarker
 CM = 28.3464567
 p_LINE_HEIGHT = 20
 Amarelo_Happy = HexColor('#fbdc06')
-sheet_padding_top = 15
+sheet_padding_top = 20
 sheet_padding_left = 1*CM
 
 def file_route(filename: str, src_path: str='render/src/imagens'):
@@ -531,7 +531,64 @@ def render_proposta_p8(dados: dict, documento):
     documento.drawImage(file_route("analise.png"), sheet_padding_left, y, width=16.1*CM, height=1.67*CM)
 
     ano = ['1|0.6', '2|1', '3|2', '4|3', '5|4', '6|5', '7|6', '8|7', '9|8', '10|9', '11|10', '12|11', '13|12', '14|13', '15|14', '16|15', '17|16', '18|17', '19|18', '20|19', '21|20', '22|21', '23|22', '24|23', '25|24']
-    energia_gerada = [dados.get('potencia_kit', 0) * 139 * 0.9919**i for i in range(1, 26)]
+    energia_gerada = [12 * dados.get('potencia_kit', 28.9) * 139 * 0.9919**i for i in range(1, 26)]
+    tarifas = [1.22*(1.08**i) for i in range(1, 26)]
+    economia =[]
+    fator_diurno, consumo_mes, TUSDgd, crecimento_anual_consumo = 0.5, 3700, 0.2 , 1.2
+    for tarifa, energia,i in zip(tarifas, energia_gerada, range(0, 25)):
+        consumo_ano = consumo_mes * 12*(crecimento_anual_consumo**i)
+        if energia >= consumo_ano:economia.append(energia * tarifa * fator_diurno * TUSDgd)
+        else:economia.append((energia * tarifa * fator_diurno * TUSDgd)+(consumo_ano-energia)*tarifa)
+
+    # custos = [((dados.get('nModulos', 0) * dados.get('Potencia_modulos', 0) * 139 / 2.5) + (25 * dados.get('nModulos', 0)))* 0.03**i for i in range(1, 26)]
+    custos = []
+    for i in range(0, 25):
+        monitoramewnto = (dados.get('nModulos', 12) * dados.get('Potencia_modulos', 0) * 139 / 2.5) 
+        limpeza = (25 * dados.get('nModulos', 12))
+        custos.append((monitoramewnto + limpeza) * (0.03**i))
+
+
+
+    print(custos[0])
+    custos[0] += dados.get('valor_sistema', 10500.00)
+    fluxo_caixa = [e - c for e, c in zip(economia, custos)]
+    fluxo_caixa_acumulado, fluxo = [], 0
+    print(custos)
+    for f,i in enumerate(fluxo_caixa):
+        fluxo +=f
+        fluxo_caixa_acumulado.append(fluxo)
+        # print(f"{fluxo_caixa_acumulado[-1]} - {f}")
+
+    dados_tabela = [[an, f"{en:.2f} kWh", f"R$ {ec:.2f}", f"R$ {fl:.2f}", f"R$ {ta:.2f}"] for an, en, ec, fl, ta in zip(ano, energia_gerada, economia, fluxo_caixa_acumulado, tarifas)]
+
+    tabela = Table(dados_tabela, colWidths=[(A4[0]-2*CM)/5]*5)
+    cabecalho = Table([['Ano', 'Energia Gerada (kWh)', 'Economia (R$)', 'Fluxo de Caixa Acumulado (R$)', 'Tarifa (R$/kWh)']],colWidths=[(A4[0]-2*CM)/5]*5)
+
+    cabecalho.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), HexColor("#1A1A1A")),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#fbfbfb')),
+        ('FONTNAME', (0, 0), (-1, -1), 'TrebuchetMS-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
+
+    cabecalho_width, cabecalho_height = cabecalho.wrap(0, 0)
+    y -= (cabecalho_height + 10)
+    cabecalho.drawOn(documento, (A4[0] - cabecalho_width) / 2, y)
+
+    tabela.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), HexColor("#bfbfbf")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('FONTNAME', (0, 0), (-1, 0), 'TrebuchetMS-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#A1A1A1A')),]))
+    
+    tabela_width, tabela_height = tabela.wrap(0, 0)
+    y -= (tabela_height)
+    tabela.drawOn(documento, (A4[0] - tabela_width) / 2, y)
+
+
 
     return documento
 
