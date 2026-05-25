@@ -526,70 +526,114 @@ def render_proposta_p7(dados: dict, documento):
     return documento
 
 def render_proposta_p8(dados: dict, documento):
+    fator_diurno, consumo_mes, TUSDgd, crecimento_anual_consumo = 0.5, 3700, 0.2 , 1.2
+    fluxo_caixa_acumulado, fluxo = [], 0
+    
     documento.showPage()
     y = A4[1] - 1.67*CM - sheet_padding_top
     documento.drawImage(file_route("analise.png"), sheet_padding_left, y, width=16.1*CM, height=1.67*CM)
 
     ano = ['1|0.6', '2|1', '3|2', '4|3', '5|4', '6|5', '7|6', '8|7', '9|8', '10|9', '11|10', '12|11', '13|12', '14|13', '15|14', '16|15', '17|16', '18|17', '19|18', '20|19', '21|20', '22|21', '23|22', '24|23', '25|24']
+    
     energia_gerada = [12 * dados.get('potencia_kit', 28.9) * 139 * 0.9919**i for i in range(1, 26)]
-    tarifas = [1.22*(1.08**i) for i in range(1, 26)]
-    economia =[]
-    fator_diurno, consumo_mes, TUSDgd, crecimento_anual_consumo = 0.5, 3700, 0.2 , 1.2
-    for tarifa, energia,i in zip(tarifas, energia_gerada, range(0, 25)):
-        consumo_ano = consumo_mes * 12*(crecimento_anual_consumo**i)
-        if energia >= consumo_ano:economia.append(energia * tarifa * fator_diurno * TUSDgd)
-        else:economia.append((energia * tarifa * fator_diurno * TUSDgd)+(consumo_ano-energia)*tarifa)
+    tarifas        = [1.22*(1.08**i) for i in range(0, 25)]
+    consumo_ano    = [consumo_mes * 12*(crecimento_anual_consumo**i) for i in range(0, 25)]
+    
+    C_geracao =[]
+    for tarifa, energia, consumo in zip(tarifas, energia_gerada, consumo_ano):
+        if energia >= consumo:C_geracao.append(energia * tarifa * fator_diurno * TUSDgd)
+        else                     :C_geracao.append((energia * tarifa * fator_diurno * TUSDgd)+(consumo-energia)*tarifa)
 
-    # custos = [((dados.get('nModulos', 0) * dados.get('Potencia_modulos', 0) * 139 / 2.5) + (25 * dados.get('nModulos', 0)))* 0.03**i for i in range(1, 26)]
+    S_geracao = [t*c for t, c in zip(tarifas, consumo_ano)]
+    
     custos = []
     for i in range(0, 25):
-        monitoramewnto = (dados.get('nModulos', 12) * dados.get('Potencia_modulos', 0) * 139 / 2.5) 
+        monitoramewnto = (dados.get('nModulos', 12) * dados.get('Potencia_modulos', 615) * 139 / 2.5) 
         limpeza = (25 * dados.get('nModulos', 12))
         custos.append((monitoramewnto + limpeza) * (0.03**i))
-
-
-
-    print(custos[0])
     custos[0] += dados.get('valor_sistema', 10500.00)
+
+    economia = [s - c for s, c in zip(S_geracao, C_geracao)]
+
     fluxo_caixa = [e - c for e, c in zip(economia, custos)]
-    fluxo_caixa_acumulado, fluxo = [], 0
-    print(custos)
-    for f,i in enumerate(fluxo_caixa):
+    for i, f in enumerate(fluxo_caixa):
         fluxo +=f
         fluxo_caixa_acumulado.append(fluxo)
-        # print(f"{fluxo_caixa_acumulado[-1]} - {f}")
 
-    dados_tabela = [[an, f"{en:.2f} kWh", f"R$ {ec:.2f}", f"R$ {fl:.2f}", f"R$ {ta:.2f}"] for an, en, ec, fl, ta in zip(ano, energia_gerada, economia, fluxo_caixa_acumulado, tarifas)]
+    def tousand_separator(value):
+        return f'{value:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
 
-    tabela = Table(dados_tabela, colWidths=[(A4[0]-2*CM)/5]*5)
-    cabecalho = Table([['Ano', 'Energia Gerada (kWh)', 'Economia (R$)', 'Fluxo de Caixa Acumulado (R$)', 'Tarifa (R$/kWh)']],colWidths=[(A4[0]-2*CM)/5]*5)
+    dados_tabela = [[an, f"{tousand_separator(en)} kWh", f"R$ {tousand_separator(ec)}", f"R$ {tousand_separator(fl)}", f"R$ {tousand_separator(ta)}"] for an, en, ec, fl, ta in zip(ano, energia_gerada, economia, fluxo_caixa_acumulado, tarifas)]
+
+    colWidths=[(1.5*CM), (A4[0]-3.5*CM)/4, (A4[0]-3.5*CM)/4, (A4[0]-3.5*CM)/4, (A4[0]-3.5*CM)/4]
+    tabela = Table(dados_tabela, colWidths=colWidths)
+    cabecalho = Table([['Ano', 'Energia Gerada (kWh)', 'Economia (R$)', 'Fluxo de Caixa (R$)', 'Tarifa (R$/kWh)']],colWidths=colWidths)
 
     cabecalho.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), HexColor("#1A1A1A")),
         ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#fbfbfb')),
         ('FONTNAME', (0, 0), (-1, -1), 'TrebuchetMS-Bold'),
         ('FONTSIZE', (0, 0), (-1, -1), 9),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#fbfbfb')),
+        ]))
 
     cabecalho_width, cabecalho_height = cabecalho.wrap(0, 0)
     y -= (cabecalho_height + 10)
     cabecalho.drawOn(documento, (A4[0] - cabecalho_width) / 2, y)
 
     tabela.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), HexColor("#bfbfbf")),
+        ('BACKGROUND', (0, 0), (-1, -1), HexColor("#f1f1f1")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-        ('FONTNAME', (0, 0), (-1, 0), 'TrebuchetMS-Bold'),
+        # ('FONTNAME', (0, 0), (-1, 0), 'TrebuchetMS-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 9),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#A1A1A1A')),]))
+        # ('LINEBELOW', (0, 0), (-1, 0), 1.5, colors.black), # Linha divisória abaixo do cabeçalho
+        # ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#A1A1A1A')),
+        ]))
     
     tabela_width, tabela_height = tabela.wrap(0, 0)
     y -= (tabela_height)
     tabela.drawOn(documento, (A4[0] - tabela_width) / 2, y)
 
+    footer = Table([
+        ["Tempo de retorno do investimento:","1 ANO E 3 MESES"],
+        ["Economia em 25 anos: ","R$ 2.923.079,68"]],
+        colWidths=[(A4[0]-2*CM)/2, (A4[0]-2*CM)/2])
+    
+    footer.setStyle(TableStyle([
+        ('LINEABOVE', (0, 0), (-1, 0), 2, colors.white),
+        ('BACKGROUND', (0, 0), (-1, -1), HexColor('#f1f1f1')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+        ('FONTNAME', (0, 0), (-1, -1), 'TrebuchetMS-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),]))
+    
+    footer_width, footer_height = footer.wrap(0, 0)
+    y -= footer_height
+    footer.drawOn(documento, (A4[0] - footer_width) / 2, y)
+    
+    ano = [2034, 2033, 2032, 2031, 2030, 2029, 2028, 2027, 2026,"Ano"]
+    C_geracao_mes, S_geracao_mes = [ f"R$ {tousand_separator(e/12)}" for e in C_geracao[9::-1]], [ f"R$ {tousand_separator(e/12)}" for e in S_geracao[9::-1]]
+    economia_percentual, economia_mes = [f"{(1-(float(c.replace('R$ ', '').replace(',', '')) / float(s.replace('R$ ', '').replace(',', '')))):.2%}" for s, c in zip(S_geracao_mes[9::-1], C_geracao_mes[9::-1])], [f"R$ {tousand_separator(float(s.replace('R$ ', '').replace(',', '')) - float(c.replace('R$ ', '').replace(',', '')))}" for s, c in zip(S_geracao_mes[9::-1], C_geracao_mes[9::-1])]
+    C_geracao_mes.append("Com Geração")
+    S_geracao_mes.append("Sem Geração")
+    economia_percentual.append("Economia %")
+    economia_mes.append("Economia Mensal")
 
-
+    comparatvo = Table([[an, cg, sg, e_p, e_m] for an, cg, sg, e_p, e_m in zip(ano[::-1], C_geracao_mes[::-1], S_geracao_mes[::-1], economia_percentual[::-1], economia_mes[::-1])], colWidths=[(A4[0]-2*CM)/5]*5)
+    comparatvo.setStyle(TableStyle([
+        ('LINEABOVE', (0, 0), (-1, 0), 2, colors.white),
+        ('BACKGROUND', (0, 0), (-1, 0), HexColor('#1A1A1A')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#fbfbfb')),
+        ('FONTNAME', (0, 0), (-1, 0), 'TrebuchetMS-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),]))
+    comparativo_width, comparativo_height = comparatvo.wrap(0, 0)
+    y -= (comparativo_height + p_LINE_HEIGHT)
+    comparatvo.drawOn(documento, (A4[0] - comparativo_width) / 2, y)
     return documento
 
 def render_proposta(dados: dict):
