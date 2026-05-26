@@ -3,7 +3,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4 #(595.2755905511812, 841.8897637795277)
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import Table, TableStyle, Image
+from reportlab.platypus import Table, TableStyle, Image, Paragraph
 from reportlab.lib import colors
 from reportlab.lib.colors import HexColor   
 from reportlab.graphics.shapes import Drawing, String, Rect, Polygon
@@ -13,6 +13,8 @@ from reportlab.graphics.widgets.markers import makeMarker
 from reportlab.graphics import renderPDF
 
 from reportlab.graphics.charts.barcharts import HorizontalBarChart
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER
 
 
 CM = 28.3464567
@@ -708,24 +710,49 @@ def render_proposta_p9(dados: dict, documento):
     y-= (1.82*CM + p_LINE_HEIGHT + altura_grafico)
     documento.drawImage(file_route("contribuindo.png"), sheet_padding_left, y, width=16.77*CM, height=1.82*CM)
 
-    img_arvores = Image("arvore.png", width=2.17*CM, height=2.17*CM)
-    img_co2 = Image("arvore.png", width=2.17*CM, height=2.17*CM)
-    img_carros = Image("carro.png", width=2.17*CM, height=2.17*CM)
-    dados_tabela=[[img_co2,"REDUÇÃO DE CO²","78 t"],
-                  [img_arvores,"ÁRVORES SALVAS","2.112 Árvores"],
-                  [img_carros,"REDUÇÃO DE EMISSÃO DE GASES POR CARROS","520.000 km/h"]
-                  ]
-    tabela = Table(dados_tabela, colWidths=[A4[0]-3*CM])
+    imgs = [Image(file_route("COdois.png"), width=2.17*CM, height=2.17*CM),
+            Image(file_route("arvore.png"), width=2.17*CM, height=2.17*CM),
+            Image(file_route("carro.png"), width=2.17*CM, height=2.17*CM)]
+
+    styles = getSampleStyleSheet()
+    estilo_texto = ParagraphStyle(
+        'TextoQuebraAutomatica',
+        parent=styles['Normal'],
+        fontName='TrebuchetMS',
+        fontSize=10,
+        leading=14,         # ESSENCIAL: Espaço entre as linhas quando o texto quebrar
+        alignment=TA_CENTER # Centraliza o texto dentro do parágrafo
+    )
+
+    dados_tabela = [
+        # Linha 1: Ícones (com tamanho fixo)
+        imgs,  
+        
+        # Linha 2: Textos longos que vão quebrar automaticamente se não couberem
+        [
+            Paragraph("REDUÇÃO DE CO² NO AMBIENTE", estilo_texto), 
+            Paragraph("TOTAL DE ÁRVORES SALVAS NO PERÍODO", estilo_texto), 
+            Paragraph("REDUÇÃO DE EMISSÃO DE GASES POLUENTES POR VEÍCULOS", estilo_texto)
+        ],  
+        
+        # Linha 3: Valores
+        [
+            Paragraph("78 t", estilo_texto), 
+            Paragraph("2.112 Árvores", estilo_texto), 
+            Paragraph("520.000 km", estilo_texto)
+        ]
+    ]
+    tabela = Table(dados_tabela, colWidths=[(A4[0]-3*CM)/3]*3)
 
     tabela.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), HexColor('#f1f1f1')),
+        ('BACKGROUND', (0, 0), (-1, -1), colors.white),
         ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
         ('FONTNAME', (0, 0), (-1, -1), 'TrebuchetMS-Bold'),
         ('FONTSIZE', (0, 0), (-1, -1), 10),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),]))
     
     tabela_width, tabela_height = tabela.wrap(0, 0)
-    y -= (tabela_height + 10)
+    y -= (tabela_height + p_LINE_HEIGHT*3)
     tabela.drawOn(documento, (A4[0] - tabela_width) / 2, y)
     
     return documento
@@ -734,8 +761,26 @@ def render_proposta_p10(dados: dict, documento):
     documento.showPage()
     register_font(documento, font_name='TrebuchetMS.ttf', call='TrebuchetMS')
     register_font(documento, font_name='Trebuchet MS Bold.ttf', call='TrebuchetMS-Bold')
-    y = A4[1] - 1.75*CM - sheet_padding_top
-    documento.drawImage(file_route("comparativo.png"), sheet_padding_left, y, width=18.36*CM, height=1.75*CM)
+    y = A4[1] - 1.49*CM - sheet_padding_top
+    documento.drawImage(file_route("local-long.png"), sheet_padding_left, y, width=10*CM, height=1.49*CM)
+    y-= (p_LINE_HEIGHT*2 + 3.12*CM)
+    img = Image(file_route("pin.png"),  width=2.19*CM, height=3.12*CM )
+    img.drawOn(documento, (A4[0] - 2.19*CM)/2, y)
+    documento.setFont('TrebuchetMS', 12)
+    
+    styles = getSampleStyleSheet()
+    estilo_texto = ParagraphStyle(
+        'TextoQuebraAutomatica',
+        parent=styles['Normal'],
+        fontName='TrebuchetMS',
+        fontSize=10,
+        leading=14,         # ESSENCIAL: Espaço entre as linhas quando o texto quebrar
+        alignment=TA_CENTER # Centraliza o texto dentro do parágrafo
+    )
+    endereco = Paragraph("REDUÇÃO DE EMISSÃO DE GASES POLUENTES POR VEÍCULOS", estilo_texto)
+    endereco_width, endereco_height = endereco.wrap(A4[0]-2*sheet_padding_left, 0)
+    y-= (p_LINE_HEIGHT + endereco_height)
+    endereco.drawOn(documento, (A4[0]-endereco_width)/2, y)
     return documento
 
 def render_proposta(dados: dict):
