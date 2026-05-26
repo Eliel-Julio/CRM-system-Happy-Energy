@@ -773,14 +773,40 @@ def render_proposta_p10(dados: dict, documento):
         'TextoQuebraAutomatica',
         parent=styles['Normal'],
         fontName='TrebuchetMS',
-        fontSize=10,
-        leading=14,         # ESSENCIAL: Espaço entre as linhas quando o texto quebrar
+        fontSize=12,
+        leading=16,         # ESSENCIAL: Espaço entre as linhas quando o texto quebrar
         alignment=TA_CENTER # Centraliza o texto dentro do parágrafo
     )
     endereco = Paragraph("REDUÇÃO DE EMISSÃO DE GASES POLUENTES POR VEÍCULOS", estilo_texto)
     endereco_width, endereco_height = endereco.wrap(A4[0]-2*sheet_padding_left, 0)
     y-= (p_LINE_HEIGHT + endereco_height)
     endereco.drawOn(documento, (A4[0]-endereco_width)/2, y)
+    y-= (2*p_LINE_HEIGHT + 1.84*CM)
+
+    documento.drawImage(file_route("validade.png"), sheet_padding_left, y, width=10.7*CM, height=1.84*CM)
+
+    Paragraphs = [
+        [Paragraph('Desde já, agradecemos pela confiança. Espero que possamos trabalhar juntos para garantir a vocês todos os benefícios que a energia solar pode proporcionar.', estilo_texto)],
+        [Paragraph('Para esclarecer qualquer dúvida, conte com nosso atendimento, estaremos de prontidão para você.', estilo_texto)],
+        [Paragraph('Essa proposta tem validade de 30 dias.', estilo_texto)],
+    ]
+    tabela = Table(Paragraphs, colWidths=[A4[0]-2*sheet_padding_left])
+    tabela.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.white),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+        ('FONTNAME', (0, 0), (-1, -1), 'TrebuchetMS'),
+        ('FONTSIZE', (0, 0), (-1, -1), 12),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    tabela_width, tabela_height = tabela.wrap(0, 0)
+    y-= (tabela_height + p_LINE_HEIGHT)
+    tabela.drawOn(documento, (A4[0] - tabela_width) / 2, y)
+    y-= (2*p_LINE_HEIGHT + 3.14*CM)
+    documento.drawImage(file_route("social-midias-tag.png"), (A4[0] - 13.65*CM)/2, y, width=13.65*CM, height=3.14*CM)
+
     return documento
 
 def render_proposta(dados: dict):
