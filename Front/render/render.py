@@ -36,25 +36,18 @@ def register_font(doc, font_name='TrebuchetMS.ttf', call='TrebuchetMS'):
     if os.path.exists(font_path):pdfmetrics.registerFont(TTFont(call, font_path))
     else: raise FileNotFoundError(f"Font file '{font_name}' not found at path: {font_path}")
         
-def render_proposta_p1(DadosProposta: dict, documento=None):
-    if not DadosProposta:
-        raise ValueError("DadosProposta não pode ser vazio")
-
-    # Tentar registrar variante Bold (TrebuchetMS-Bold.ttf)
-    # bold_font_path = os.path.join(base_dir, 'src', 'Trebuchet MS Bold.ttf')
-    # bold_font_name = font_name + '-Bold'
-    # if os.path.exists(bold_font_path):pdfmetrics.registerFont(TTFont(bold_font_name, bold_font_path))
+def render_proposta_p1(dados: dict, documento=None):
 
     documento.drawImage(file_route("capa.png"), 0, 0, width=A4[0], height=A4[1])
 
     cabeçalho_y, tamanho_fonte = 300, 18
 
     linhas_cabecalho = [
-        ("Proposta Nº: ", f"{DadosProposta['id']}", ""),
-        ("Data: ", f"{DadosProposta.get('data', 'N/A')}", ""),
-        ("Cliente: ", f"{DadosProposta.get('nome_completo', 'N/A')}", ""),
-        ("Potência a ser instalada: ", f"{DadosProposta.get('potencia_kit', 'N/A')}", " kWp"),
-        ("Cidade: ", f"{DadosProposta.get('cidade-uf', 'N/A')}", "")
+        ("Proposta Nº: ", f"{dados['id']}", ""),
+        ("Data: ", f"{dados.get('data', 'N/A')}", ""),
+        ("Cliente: ", f"{dados.get('nome', 'N/A')}", ""),
+        ("Potência a ser instalada: ", f"{dados.get('potencia_kit', 'N/A')}", " kWp"),
+        ("Cidade: ", f"{dados.get('cidade-uf', 'N/A')}", "")
     ]
 
     register_font(documento, font_name='TrebuchetMS.ttf', call='TrebuchetMS')
@@ -99,7 +92,7 @@ def render_proposta_p5(dados: dict, documento):
     documento.drawImage(file_route("dados do cliente.png"), sheet_padding_left, A4[1]-(1.59*CM)-sheet_padding_top, width=8.94*CM, height=1.59*CM)
     
     dados_cliente = [
-        ("Cliente: ", dados.get("nome_completo", "N/A")),
+        ("Cliente: ", dados.get("nome", "N/A")),
         ("Telefone: ", dados.get("telefone", "N/A")),
         ("Endereço: ", dados.get("endereco", "N/A")),
         ("Email: ", dados.get("email", "N/A")),
@@ -117,9 +110,9 @@ def render_proposta_p5(dados: dict, documento):
     dados_tabela, largura_colunas = [
         ['PRODUÇÃO MÉDIA', 'ÁREA TOTAL', 'PRODUÇÃO ANUAL', 'POTÊNCIA DO SISTEMA'],
         [
-            f"{dados.get('producao_media', '--')} kWh", 
+            f"{dados.get('potencia_kit', 0) * dados.get('CONST_IRRAD', 0)} kWh", 
             f"{dados.get('area_total', '--')} m²", 
-            f"{dados.get('producao_anual', '--')} GWh", 
+            f"{dados.get('potencia_kit', 0) * 12 * dados.get('CONST_IRRAD', 0)} kWh", 
             f"{dados.get('potencia_kit', '--')} kWp"
         ]
     ], [115, 115, 115, 115] 
@@ -234,7 +227,7 @@ def render_proposta_p6(dados: dict, documento):
         # Linha 1: Dados principais do Kit
         [f"KIT {dados.get('potencia_kit', '--.--')} kwp WEG metálico", "1", img_inversor],
         # Linhas 2: Reservada para a descrição longa expandida (via SPAN)
-        [descricao_texto, '', '']
+        [dados.get('descricao', ''), '', '']
     ]
 
     # Larguras das colunas somando exatamente 17.09 CM (para alinhar com o seu gráfico)
@@ -303,9 +296,9 @@ def render_proposta_p6(dados: dict, documento):
     documento.drawImage(file_route("garantias.png"), sheet_padding_left, y, width=10.9*CM, height=1.77*CM)
 
     garantias =[
-        ['Painel',dados.get('garantia_painel', 'N/A'),'serviço', dados.get('garantia_servico', 'N/A')],
+        ['Painel',dados.get('garantias', {}).get('painel', 'N/A'),'serviço', dados.get('garantias', {}).get('instalacao', 'N/A')],
         # [None,None,None,None],
-        ['Inversor',dados.get('garantia_inversor', 'N/A'),'Estrutura', dados.get('garantia_estrutura', 'N/A')]
+        ['Inversor',dados.get('garantias', {}).get('inversor', 'N/A'),'Estrutura', dados.get('garantias', {}).get('estrutura', 'N/A')]
     ]
 
     tabela_garantias = Table(garantias, colWidths=[4.5*CM, 3.5*CM, 4.5*CM, 3.5*CM])
@@ -509,11 +502,11 @@ def render_proposta_p7(dados: dict, documento):
     y = A4[1] - 1.61*CM - sheet_padding_top
     documento.drawImage(file_route("investimento.png"), sheet_padding_left, y, width=17.49*CM, height=1.61*CM)
     dados_investimento = [
-        ('PREÇO DO SISTEMA INSTALADO', f"R$ {dados.get('valor_sistema', '0.00')}"),
-        ('PRAZO DE INSTALAÇÃO', f"{dados.get('prazo_instalacao', '0')} Dias"),
-        ('FORMA DE PAGAMENTO', dados.get('forma_pagamento', 'N/A')),
-        ('CONDIÇÃO DE PAGAMENTO', dados.get('condicao_pagamento', 'N/A')),
-        ('RETORNO DO INVESTIMENTO', dados.get('retorno_investimento', 'N/A'))
+        ('PREÇO DO SISTEMA INSTALADO: ', f"R$ {dados.get('valor_sistema', '0.00')}"),
+        ('PRAZO DE INSTALAÇÃO: ', f"{dados.get('prazo_instalacao', '0')} Dias"),
+        ('FORMA DE PAGAMENTO: ', dados.get('forma_pagamento', 'N/A')),
+        ('CONDIÇÃO DE PAGAMENTO: ', dados.get('condicao_pagamento', 'N/A')),
+        ('RETORNO DO INVESTIMENTO: ', dados.get('retorno_investimento', 'N/A'))
     ]
 
     for rotulo, valor in dados_investimento:
@@ -553,10 +546,10 @@ def render_proposta_p8(dados: dict, documento):
     
     custos = []
     for i in range(0, 25):
-        monitoramewnto = (dados.get('nModulos', 12) * dados.get('Potencia_modulos', 615) * 139 / 2.5) 
-        limpeza = (25 * dados.get('nModulos', 12))
+        monitoramewnto = (dados.get('modulos', {}).get('quantidade', 12) * dados.get('Potencia_modulos', 615) * 139 / 2.5)
+        limpeza = (25 * dados.get('modulos', {}).get('quantidade', 12))
         custos.append((monitoramewnto + limpeza) * (0.03**i))
-    custos[0] += dados.get('valor_sistema', 10500.00)
+    custos[0] += dados.get('valor', 00.00)
 
     economia = [s - c for s, c in zip(S_geracao, C_geracao)]
 
@@ -642,10 +635,8 @@ def render_proposta_p8(dados: dict, documento):
     return documento
 
 def render_grafico_comparativo(dados: dict, documento, y):
-    # --- Configurações de Dados Baseadas na Imagem ---
-    # Se os dados não vierem do dicionário, assume estes padrões:
-    labels = dados.get('labels', ['Energia Solar (16.42%)', 'CDI (1.13%)', 'Poupança (0.63%)'])
-    valores = dados.get('valores', [16.42, 1.13, 0.63])
+    labels = ['Energia Solar (16.42%)', 'CDI (1.13%)', 'Poupança (0.63%)']
+    valores = [16.42, 1.13, 0.63]
     
     cor_preto = HexColor('#1A1A1A')
     cores_barras = [Amarelo_Happy, cor_preto, cor_preto] 
@@ -810,6 +801,8 @@ def render_proposta_p10(dados: dict, documento):
     return documento
 
 def render_proposta(dados: dict):
+    if not dados:raise ValueError("Dados não pode ser vazio")
+
     documento = canvas.Canvas(f"proposta_{dados['id']}.pdf", pagesize=A4)
     documento = render_proposta_p1(dados, documento)
     documento = render_proposta_p2(dados, documento)
@@ -823,5 +816,24 @@ def render_proposta(dados: dict):
     documento = render_proposta_p10(dados, documento)
     return documento
 
-dados={"id": 1, "nome": "Proposta de Projeto", "descricao": "Descrição detalhada do projeto."}
+dados={
+    "id": 1,
+    "nome": "Eliel Júlio Soares da Silva",
+    "descricao": "12 MÓDULO FOTOVOLTAICO 610W - WEG BIFACIAL \n01 INVERSOR FOTOVOLTAICO SIW400G M050 W00, Monofasico 220V \nESTRUTURA DE FIXAÇÃO FIBROCIMENTO \nKIT COMPLETO DE INSTALAÇÃO",
+    "data": "2024-06-01",
+    "telefone": "(11) 99999-9999",
+    "email": "eliel.silva@email.com",
+    "potencia_kit": 7.32,
+    "cidade-uf":"Petrolona-PE",
+    "CONST_IRRAD": 139,
+    "Area_total": 21.44,
+    "valor": 16342.95,
+    "garantias": {"painel": "10 anos", "inversor": "10 anos", "estrutura": "10 anos", "instalacao": "1 ano"},
+    "economia_total":"errado aqui oh",
+    "prazo_instalacao": 60,
+    "forma_pagamento": "Financiamento Solfacil",
+    "condicao_pagamento": "Entrada de 30% e o restante em 12x sem juros",
+    "retorno_investimento": "1 ano e 3 meses",
+    "modulos":{"potencia": 610, "quantidade": 12, "marca": "WEG", "modelo": "615 Wp - WEG BIFACIAL"}, 
+    }
 render_proposta(dados).save()
