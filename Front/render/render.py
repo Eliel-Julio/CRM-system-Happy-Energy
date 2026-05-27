@@ -22,6 +22,8 @@ p_LINE_HEIGHT = 20
 Amarelo_Happy = HexColor('#fbdc06')
 sheet_padding_top = 20
 sheet_padding_left = 1*CM
+font_size = 12
+
 
 def file_route(filename: str, src_path: str='render/src/imagens'):
     if not filename:
@@ -470,11 +472,10 @@ def render_grafico_investimento(dados: dict, documento, y=A4[1]):
     # TABELA INFERIOR DE RESUMO (Tempo de Retorno vs Economia)
     # -------------------------------------------------------------------------
     dados_resumo = [
-        ["Tempo de retorno do investimento: 1\nANO E 3 MESES", f"Economia em 25 anos:\nR$ {dados.get('economia_total', '2.923.079,68')}"]
+        ["Tempo de retorno do investimento: 1\nANO E 3 MESES", f"Economia em 25 anos:\nR$ {gen_finace_data(dados).get('economia_total', 0.00)}"]
     ]
     
-    largura_tabela_resumo = [largura_desenho / 2, largura_desenho / 2]
-    tabela_resumo = Table(dados_resumo, colWidths=largura_tabela_resumo)
+    tabela_resumo = Table(dados_resumo, colWidths=[largura_desenho/2]*2)
     
     tabela_resumo.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), HexColor('#EAEAEA')),
@@ -494,6 +495,56 @@ def render_grafico_investimento(dados: dict, documento, y=A4[1]):
     
     # Retorna o y atualizado para o seu fluxo não sobrepor os próximos elementos do PDF
     return documento
+
+def gen_finace_data(dados: dict):
+    def tousand_separator(value):
+        return f'{value:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
+    # fator_diurno, consumo_mes, TUSDgd = 0.5, 3700, 0.2 
+    CONSTS=dados.get("CONSTS", {})
+#    "CONSTS": {
+#         "CONST_IRRAD": 139,
+#         "CONST_FATOR_DIURNO": 0.5,
+#         "CONST_TUSDgd": 0.2,
+#         "CRECIMENTO_ANUAL_CONSUMO": 0.0081,
+#         "DECRESCIMO_GERACAO": 0.15
+#     },
+    ano = ['1|0.6', '2|1', '3|2', '4|3', '5|4', '6|5', '7|6', '8|7', '9|8', '10|9', '11|10', '12|11', '13|12', '14|13', '15|14', '16|15', '17|16', '18|17', '19|18', '20|19', '21|20', '22|21', '23|22', '24|23', '25|24']
+    fluxo_caixa_acumulado = []
+    energia_gerada = [12 * dados.get('potencia_kit', 7.32) * CONSTS.get('CONST_IRRAD', 139) * (1-CONSTS.get('DECRESCIMO_GERACAO', 0.0081))**i for i in range(0, 25)]
+    tarifas        = [CONSTS.get('TARIFA_INICIAL', 1.22) * (CONSTS.get('TARIFA_INFLACAO_ANUAL', 0.08)**i) for i in range(0, 25)]
+    consumo_ano    = [CONSTS.get('CONSUMO_MES_INICIAL', 800) * 12*(CONSTS.get('CRECIMENTO_ANUAL_CONSUMO', 0.2)**i) for i in range(0, 25)]
+    C_geracao =[]
+    for tarifa, energia, consumo in zip(tarifas, energia_gerada, consumo_ano):
+        if energia >= consumo:C_geracao.append(energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) * ( 1 + CONSTS.get('CONST_TUSDgd', 0.2)))
+        else                     :C_geracao.append((energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) * ( 1 + CONSTS.get('CONST_TUSDgd', 0.2)))+(consumo-energia)*tarifa)
+
+    S_geracao = [t*c for t, c in zip(tarifas, consumo_ano)]
+    
+    custos = []
+    for i in range(0, 25):
+        monitoramewnto = (dados.get('modulos', {}).get('quantidade', 12) * dados.get('Potencia_modulos', 610) * CONSTS.get('CONST_IRRAD',139) / 2500)
+        limpeza = (25 * dados.get('modulos', {}).get('quantidade', 12))
+        custos.append((monitoramewnto + limpeza) * (( 1 + CONSTS.get('MANUTENCAO_INFLACAO_ANUAL', 0.03))**i))
+    custos[0] = dados.get('valor', 00.00 )
+
+    economia = [s - c for s, c in zip(S_geracao, C_geracao)]
+    fluxo_caixa = [e - c for e, c in zip(economia, custos)]
+    fluxo_caixa_acumulado = [sum(fluxo_caixa[0:i]) for i in range(1, 25)]
+
+    ano_ = [2034, 2033, 2032, 2031, 2030, 2029, 2028, 2027, 2026,"Ano"]
+    C_geracao_mes, S_geracao_mes = [ f"R$ {tousand_separator(e/12)}" for e in C_geracao[9::-1]], [ f"R$ {tousand_separator(e/12)}" for e in S_geracao[9::-1]]
+    [ f"R$ {tousand_separator(e/12)}" for e in C_geracao[9::-1]]
+    print(C_geracao_mes)
+    economia_percentual, economia_mes = [f"{(1-(float(c.replace('R$ ', '').replace(',', '')) / float(s.replace('R$ ', '').replace(',', '')))):.2%}" for s, c in zip(S_geracao_mes[9::-1], C_geracao_mes[9::-1])], [f"R$ {tousand_separator(float(s.replace('R$ ', '').replace(',', '')) - float(c.replace('R$ ', '').replace(',', '')))}" for s, c in zip(S_geracao_mes[9::-1], C_geracao_mes[9::-1])]
+    C_geracao_mes.append("Com Geração")
+    S_geracao_mes.append("Sem Geração")
+    economia_percentual.append("Economia %")
+    economia_mes.append("Economia Mensal")
+    
+    return {
+            "dados_tabela": [[an, f"{tousand_separator(en)} kWh", f"R$ {tousand_separator(ec)}", f"R$ {tousand_separator(fl)}", f"R$ {tousand_separator(ta)}"] for an, en, ec, fl, ta in zip(ano, energia_gerada, economia, fluxo_caixa_acumulado, tarifas)],
+            "comparativo": [[an, cg, sg, e_p, e_m] for an, cg, sg, e_p, e_m in zip(ano_[::-1], C_geracao_mes[::-1], S_geracao_mes[::-1], economia_percentual[::-1], economia_mes[::-1])],
+            "economia_total": tousand_separator(sum(economia))}
 
 def render_proposta_p7(dados: dict, documento):
     register_font(documento, font_name='TrebuchetMS.ttf', call='TrebuchetMS')
@@ -524,47 +575,15 @@ def render_proposta_p7(dados: dict, documento):
     return documento
 
 def render_proposta_p8(dados: dict, documento):
-    fator_diurno, consumo_mes, TUSDgd, crecimento_anual_consumo = 0.5, 3700, 0.2 , 1.2
-    fluxo_caixa_acumulado, fluxo = [], 0
+    finace_data = gen_finace_data(dados)
     
     documento.showPage()
     y = A4[1] - 1.67*CM - sheet_padding_top
     documento.drawImage(file_route("analise.png"), sheet_padding_left, y, width=16.1*CM, height=1.67*CM)
 
-    ano = ['1|0.6', '2|1', '3|2', '4|3', '5|4', '6|5', '7|6', '8|7', '9|8', '10|9', '11|10', '12|11', '13|12', '14|13', '15|14', '16|15', '17|16', '18|17', '19|18', '20|19', '21|20', '22|21', '23|22', '24|23', '25|24']
     
-    energia_gerada = [12 * dados.get('potencia_kit', 28.9) * 139 * 0.9919**i for i in range(1, 26)]
-    tarifas        = [1.22*(1.08**i) for i in range(0, 25)]
-    consumo_ano    = [consumo_mes * 12*(crecimento_anual_consumo**i) for i in range(0, 25)]
-    
-    C_geracao =[]
-    for tarifa, energia, consumo in zip(tarifas, energia_gerada, consumo_ano):
-        if energia >= consumo:C_geracao.append(energia * tarifa * fator_diurno * TUSDgd)
-        else                     :C_geracao.append((energia * tarifa * fator_diurno * TUSDgd)+(consumo-energia)*tarifa)
-
-    S_geracao = [t*c for t, c in zip(tarifas, consumo_ano)]
-    
-    custos = []
-    for i in range(0, 25):
-        monitoramewnto = (dados.get('modulos', {}).get('quantidade', 12) * dados.get('Potencia_modulos', 615) * 139 / 2.5)
-        limpeza = (25 * dados.get('modulos', {}).get('quantidade', 12))
-        custos.append((monitoramewnto + limpeza) * (0.03**i))
-    custos[0] += dados.get('valor', 00.00)
-
-    economia = [s - c for s, c in zip(S_geracao, C_geracao)]
-
-    fluxo_caixa = [e - c for e, c in zip(economia, custos)]
-    for i, f in enumerate(fluxo_caixa):
-        fluxo +=f
-        fluxo_caixa_acumulado.append(fluxo)
-
-    def tousand_separator(value):
-        return f'{value:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
-
-    dados_tabela = [[an, f"{tousand_separator(en)} kWh", f"R$ {tousand_separator(ec)}", f"R$ {tousand_separator(fl)}", f"R$ {tousand_separator(ta)}"] for an, en, ec, fl, ta in zip(ano, energia_gerada, economia, fluxo_caixa_acumulado, tarifas)]
-
     colWidths=[(1.5*CM), (A4[0]-3.5*CM)/4, (A4[0]-3.5*CM)/4, (A4[0]-3.5*CM)/4, (A4[0]-3.5*CM)/4]
-    tabela = Table(dados_tabela, colWidths=colWidths)
+    tabela = Table(finace_data.get('dados_tabela', []), colWidths=colWidths)
     cabecalho = Table([['Ano', 'Energia Gerada (kWh)', 'Economia (R$)', 'Fluxo de Caixa (R$)', 'Tarifa (R$/kWh)']],colWidths=colWidths)
 
     cabecalho.setStyle(TableStyle([
@@ -597,7 +616,7 @@ def render_proposta_p8(dados: dict, documento):
 
     footer = Table([
         ["Tempo de retorno do investimento:","1 ANO E 3 MESES"],
-        ["Economia em 25 anos: ","R$ 2.923.079,68"]],
+        ["Economia em 25 anos: ",f"R$ {finace_data.get('economia_total', 0.00)}"]],
         colWidths=[(A4[0]-2*CM)/2, (A4[0]-2*CM)/2])
     
     footer.setStyle(TableStyle([
@@ -612,18 +631,11 @@ def render_proposta_p8(dados: dict, documento):
     y -= footer_height
     footer.drawOn(documento, (A4[0] - footer_width) / 2, y)
     
-    ano = [2034, 2033, 2032, 2031, 2030, 2029, 2028, 2027, 2026,"Ano"]
-    C_geracao_mes, S_geracao_mes = [ f"R$ {tousand_separator(e/12)}" for e in C_geracao[9::-1]], [ f"R$ {tousand_separator(e/12)}" for e in S_geracao[9::-1]]
-    economia_percentual, economia_mes = [f"{(1-(float(c.replace('R$ ', '').replace(',', '')) / float(s.replace('R$ ', '').replace(',', '')))):.2%}" for s, c in zip(S_geracao_mes[9::-1], C_geracao_mes[9::-1])], [f"R$ {tousand_separator(float(s.replace('R$ ', '').replace(',', '')) - float(c.replace('R$ ', '').replace(',', '')))}" for s, c in zip(S_geracao_mes[9::-1], C_geracao_mes[9::-1])]
-    C_geracao_mes.append("Com Geração")
-    S_geracao_mes.append("Sem Geração")
-    economia_percentual.append("Economia %")
-    economia_mes.append("Economia Mensal")
-
-    comparatvo = Table([[an, cg, sg, e_p, e_m] for an, cg, sg, e_p, e_m in zip(ano[::-1], C_geracao_mes[::-1], S_geracao_mes[::-1], economia_percentual[::-1], economia_mes[::-1])], colWidths=[(A4[0]-2*CM)/5]*5)
+    comparatvo = Table(finace_data.get('comparativo', []), colWidths=[(A4[0]-2*CM)/5]*5)
     comparatvo.setStyle(TableStyle([
         ('LINEABOVE', (0, 0), (-1, 0), 2, colors.white),
         ('BACKGROUND', (0, 0), (-1, 0), HexColor('#1A1A1A')),
+        ('BACKGROUND', (0, 1), (-1, -1), HexColor('#f1f1f1')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#fbfbfb')),
         ('FONTNAME', (0, 0), (-1, 0), 'TrebuchetMS-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 9),
@@ -779,7 +791,7 @@ def render_proposta_p10(dados: dict, documento):
     Paragraphs = [
         [Paragraph('Desde já, agradecemos pela confiança. Espero que possamos trabalhar juntos para garantir a vocês todos os benefícios que a energia solar pode proporcionar.', estilo_texto)],
         [Paragraph('Para esclarecer qualquer dúvida, conte com nosso atendimento, estaremos de prontidão para você.', estilo_texto)],
-        [Paragraph('Essa proposta tem validade de 30 dias.', estilo_texto)],
+        [Paragraph(f'Essa proposta tem validade de {dados.get("CONSTS", {}).get("validade_proposta", "30 dias")}.', estilo_texto)],
     ]
     tabela = Table(Paragraphs, colWidths=[A4[0]-2*sheet_padding_left])
     tabela.setStyle(TableStyle([
@@ -819,13 +831,23 @@ def render_proposta(dados: dict):
 dados={
     "id": 1,
     "nome": "Eliel Júlio Soares da Silva",
+    "endereco": "Rua das Flores, 123 - Petrolina, PE",
     "descricao": "12 MÓDULO FOTOVOLTAICO 610W - WEG BIFACIAL \n01 INVERSOR FOTOVOLTAICO SIW400G M050 W00, Monofasico 220V \nESTRUTURA DE FIXAÇÃO FIBROCIMENTO \nKIT COMPLETO DE INSTALAÇÃO",
     "data": "2024-06-01",
     "telefone": "(11) 99999-9999",
     "email": "eliel.silva@email.com",
     "potencia_kit": 7.32,
     "cidade-uf":"Petrolona-PE",
-    "CONST_IRRAD": 139,
+    "CONSTS": {
+        "CONST_IRRAD": 139,
+        "CONST_FATOR_DIURNO": 0.5,
+        "CONST_TUSDgd": 0.2,
+        "CRECIMENTO_ANUAL_CONSUMO": 0.2,
+        "DECRESCIMO_GERACAO": 0.0081,
+        "TARIFA_INICIAL": 1.22,
+        "TARIFA_INFLACAO_ANUAL": 0.08,
+        "MANUTENCAO_INFLACAO_ANUAL": 0.03
+    },
     "Area_total": 21.44,
     "valor": 16342.95,
     "garantias": {"painel": "10 anos", "inversor": "10 anos", "estrutura": "10 anos", "instalacao": "1 ano"},
@@ -834,6 +856,8 @@ dados={
     "forma_pagamento": "Financiamento Solfacil",
     "condicao_pagamento": "Entrada de 30% e o restante em 12x sem juros",
     "retorno_investimento": "1 ano e 3 meses",
-    "modulos":{"potencia": 610, "quantidade": 12, "marca": "WEG", "modelo": "615 Wp - WEG BIFACIAL"}, 
+    "modulos":{"potencia": 610, "quantidade": 12, "marca": "WEG", "modelo": "615 Wp - WEG BIFACIAL"},
+    "CONSUMO_MES_INICIAL": 800,
+    "validade_proposta": "30 dias"
     }
 render_proposta(dados).save()
