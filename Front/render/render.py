@@ -511,13 +511,14 @@ def gen_finace_data(dados: dict):
     ano = ['1|0.6', '2|1', '3|2', '4|3', '5|4', '6|5', '7|6', '8|7', '9|8', '10|9', '11|10', '12|11', '13|12', '14|13', '15|14', '16|15', '17|16', '18|17', '19|18', '20|19', '21|20', '22|21', '23|22', '24|23', '25|24']
     fluxo_caixa_acumulado = []
     energia_gerada = [12 * dados.get('potencia_kit', 7.32) * CONSTS.get('CONST_IRRAD', 139) * (1-CONSTS.get('DECRESCIMO_GERACAO', 0.0081))**i for i in range(0, 25)]
-    tarifas        = [CONSTS.get('TARIFA_INICIAL', 1.22) * (CONSTS.get('TARIFA_INFLACAO_ANUAL', 0.08)**i) for i in range(0, 25)]
-    consumo_ano    = [CONSTS.get('CONSUMO_MES_INICIAL', 800) * 12*(CONSTS.get('CRECIMENTO_ANUAL_CONSUMO', 0.2)**i) for i in range(0, 25)]
+    tarifas        = [CONSTS.get('TARIFA_INICIAL', 1.22) * ((1+CONSTS.get('TARIFA_INFLACAO_ANUAL', 0.08))**i) for i in range(0, 25)]
+    consumo_ano    = [CONSTS.get('CONSUMO_MES_INICIAL', 800) * 12*(( 1 + CONSTS.get('CRECIMENTO_ANUAL_CONSUMO', 0.2))**i) for i in range(0, 25)]
     C_geracao =[]
     for tarifa, energia, consumo in zip(tarifas, energia_gerada, consumo_ano):
-        if energia >= consumo:C_geracao.append(energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) * ( 1 + CONSTS.get('CONST_TUSDgd', 0.2)))
-        else                     :C_geracao.append((energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) * ( 1 + CONSTS.get('CONST_TUSDgd', 0.2)))+(consumo-energia)*tarifa)
-
+        if energia >= consumo:
+            C_geracao.append(energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) * ( 1 + CONSTS.get('CONST_TUSDgd', 0.2)))
+        else:C_geracao.append((energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) * ( 1 + CONSTS.get('CONST_TUSDgd', 0.2)))+(consumo-energia)*tarifa)
+    print("--------------------\n",C_geracao,"\n--------------------\n")
     S_geracao = [t*c for t, c in zip(tarifas, consumo_ano)]
     
     custos = []
@@ -553,7 +554,7 @@ def render_proposta_p7(dados: dict, documento):
     y = A4[1] - 1.61*CM - sheet_padding_top
     documento.drawImage(file_route("investimento.png"), sheet_padding_left, y, width=17.49*CM, height=1.61*CM)
     dados_investimento = [
-        ('PREÇO DO SISTEMA INSTALADO: ', f"R$ {dados.get('valor_sistema', '0.00')}"),
+        ('PREÇO DO SISTEMA INSTALADO: ', f"R$ {dados.get('valor', '0.00')}"),
         ('PRAZO DE INSTALAÇÃO: ', f"{dados.get('prazo_instalacao', '0')} Dias"),
         ('FORMA DE PAGAMENTO: ', dados.get('forma_pagamento', 'N/A')),
         ('CONDIÇÃO DE PAGAMENTO: ', dados.get('condicao_pagamento', 'N/A')),
@@ -780,7 +781,7 @@ def render_proposta_p10(dados: dict, documento):
         leading=16,         # ESSENCIAL: Espaço entre as linhas quando o texto quebrar
         alignment=TA_CENTER # Centraliza o texto dentro do parágrafo
     )
-    endereco = Paragraph("REDUÇÃO DE EMISSÃO DE GASES POLUENTES POR VEÍCULOS", estilo_texto)
+    endereco = Paragraph(dados.get("endereco", ""), estilo_texto)
     endereco_width, endereco_height = endereco.wrap(A4[0]-2*sheet_padding_left, 0)
     y-= (p_LINE_HEIGHT + endereco_height)
     endereco.drawOn(documento, (A4[0]-endereco_width)/2, y)
