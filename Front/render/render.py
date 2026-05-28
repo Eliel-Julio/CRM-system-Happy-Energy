@@ -30,6 +30,8 @@ def file_route(filename: str, src_path: str='render/src/imagens'):
         raise ValueError("filename é obrigatório")
     base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, '..', src_path, filename)
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"Arquivo '{filename}' não encontrado no caminho: {file_path}")
     return os.path.normpath(file_path)
 
 def register_font(doc, font_name='TrebuchetMS.ttf', call='TrebuchetMS'):
