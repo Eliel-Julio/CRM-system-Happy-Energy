@@ -9,6 +9,10 @@ Session = sessionmaker(bind=engine)
 session = Session()
 base = declarative_base()
 
+def produto(list:list, t=1):
+    for v in list:t*=v
+    return t
+
 class propriedade(base):
     __tablename__ = 'propriedades'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -17,6 +21,8 @@ class propriedade(base):
     tipo = Column(Enum('float', 'int', 'str', 'boolean'), nullable=False)
 
     def __init__(self, nome, valor, tipo):
+        if tipo not in ('float', 'int', 'str', 'boolean'):
+            raise KeyError("Incorect type description, pleas entry on off ('float', 'int', 'str', 'boolean')")
         self.nome = nome
         self.tipo = tipo
         self.set_valor(valor)
@@ -25,7 +31,7 @@ class propriedade(base):
         return f"<Propriedade(nome='{self.nome}', valor='{self.valor}', tipo='{self.tipo}')>"
     
     def set_valor(self, valor):
-        match self.tipo:
+        match self.tipo:    
             case 'float':
                 try:
                     self.valor = float(valor)
@@ -77,46 +83,51 @@ class cliente(base):
     email = Column(String, nullable=False)
     telefone = Column(String, nullable=False)
     cidade_UF = Column(String, nullable=False)
-    
-    def __init__(self, nome, cpf, email, telefone, cidade_UF):
+    endereco = Column(String, nullable=True)
+
+    def __init__(self, nome, cpf, email, telefone, cidade_UF, endereco=None):
         self.nome = nome
         self.cpf = cpf
         self.email = email
         self.telefone = telefone
         self.cidade_UF = cidade_UF
+        self.endereco = endereco
 
 class proposta(base):
     __tablename__ = 'propostas'
     id = Column(Integer, primary_key=True, autoincrement=True)
     cliente_id = Column(Integer, ForeignKey('clientes.id'), nullable=False)
-    kit = Column(JSON, nullable=False)
     kit_id = Column(Integer, ForeignKey('kits.id'), nullable=False)
     valor_total = Column(FLOAT, nullable=False)
 
+    kit = Column(JSON, nullable=False)
+    
     cliente = relationship("cliente")
     kit = relationship("kit")
 
     def __init__(self, cliente_id, kit_id):
         self.cliente_id = cliente_id
-        self.kit = self.kit_data(kit_id)
+        
         self.kit_id = kit_id
+        self.kit = self.kit_data(kit_id)
+        
+        self.cliente_id = cliente_id
+        self.cliente = self.cliente_data(cliente_id)
+
+        self.consts = {obj.nome:obj.valor for obj in session.query(propriedade).all()}
+        
         self.valor_total = self.Def_valor_total()
 
-    def Def_valor_total(self):
-        return (self.kit.preco_c + (self.kit.n_modulos * 60) + 350)*1.3*1.07
+    def Def_valor_total(self,instal=60, extra=350 , rates={"margim":0.3,"tax":0.07, "commission":0.00}):return (self.kit.preco_c + (self.kit.n_modulos * instal) + extra)*produto([1+t for t in rates.values()])
+
+    def cliente_data(id):
+        cliente_=session.query(cliente).filter_by(id=id).first()
+        if cliente_:return{chave:valor for chave, valor in enumerate(cliente_)}
+        raise KeyError("Cliente não encontrado")
 
     def kit_data(id):
         kit_ = session.query(kit).filter_by(id=id).first()
-        if kit_:
-            return {
-                "id": kit_.id,
-                "nome": kit_.nome,
-                "descricao": kit_.descricao,
-                "preco_c": kit_.preco_c,
-                "n_modulos": kit_.n_modulos,
-                "p_modulos": kit_.p_modulos,
-                "inversor": kit_.inversor
-            }
+        if kit_:return{chave: valor for chave, valor in enumerate(kit_)}
         raise KeyError("Kit não encontrado")
 
 base.metadata.create_all(bind=engine)

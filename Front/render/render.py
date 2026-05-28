@@ -518,7 +518,7 @@ def gen_finace_data(dados: dict):
         if energia >= consumo:
             C_geracao.append(energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) * ( 1 + CONSTS.get('CONST_TUSDgd', 0.2)))
         else:C_geracao.append((energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) * ( 1 + CONSTS.get('CONST_TUSDgd', 0.2)))+(consumo-energia)*tarifa)
-    print("--------------------\n",C_geracao,"\n--------------------\n")
+    # print("--------------------\n",C_geracao,"\n--------------------\n")
     S_geracao = [t*c for t, c in zip(tarifas, consumo_ano)]
     
     custos = []
@@ -535,7 +535,7 @@ def gen_finace_data(dados: dict):
     ano_ = [2034, 2033, 2032, 2031, 2030, 2029, 2028, 2027, 2026,"Ano"]
     C_geracao_mes, S_geracao_mes = [ f"R$ {tousand_separator(e/12)}" for e in C_geracao[9::-1]], [ f"R$ {tousand_separator(e/12)}" for e in S_geracao[9::-1]]
     [ f"R$ {tousand_separator(e/12)}" for e in C_geracao[9::-1]]
-    print(C_geracao_mes)
+    # print(C_geracao_mes)
     economia_percentual, economia_mes = [f"{(1-(float(c.replace('R$ ', '').replace(',', '')) / float(s.replace('R$ ', '').replace(',', '')))):.2%}" for s, c in zip(S_geracao_mes[9::-1], C_geracao_mes[9::-1])], [f"R$ {tousand_separator(float(s.replace('R$ ', '').replace(',', '')) - float(c.replace('R$ ', '').replace(',', '')))}" for s, c in zip(S_geracao_mes[9::-1], C_geracao_mes[9::-1])]
     C_geracao_mes.append("Com Geração")
     S_geracao_mes.append("Sem Geração")
@@ -849,7 +849,6 @@ dados={
         "TARIFA_INFLACAO_ANUAL": 0.08,
         "MANUTENCAO_INFLACAO_ANUAL": 0.03
     },
-    "area_total": 21.44,
     "valor": 16342.95,
     "garantias": {"painel": "10 anos", "inversor": "10 anos", "estrutura": "10 anos", "instalacao": "1 ano"},
     "economia_total":"errado aqui oh",
