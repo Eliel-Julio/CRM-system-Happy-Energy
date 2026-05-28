@@ -112,10 +112,10 @@ def render_proposta_p5(dados: dict, documento):
     dados_tabela, largura_colunas = [
         ['PRODUÇÃO MÉDIA', 'ÁREA TOTAL', 'PRODUÇÃO ANUAL', 'POTÊNCIA DO SISTEMA'],
         [
-            f"{dados.get('potencia_kit', 0) * dados.get('CONST_IRRAD', 0)} kWh", 
-            f"{dados.get('area_total', '--')} m²", 
-            f"{dados.get('potencia_kit', 0) * 12 * dados.get('CONST_IRRAD', 0)} kWh", 
-            f"{dados.get('potencia_kit', '--')} kWp"
+            f"{dados.get('potencia_kit', 7.32) * dados.get('CONST_IRRAD', 139)} kWh", 
+            f"{dados.get('modulos', {'area': 2.39*1.14}).get('area', 0)*dados.get('modulos', {'quantidade': 12}).get('quantidade', 0)*1.1} m²", 
+            f"{dados.get('potencia_kit', 7.32) * 12 * dados.get('CONST_IRRAD', 139)} kWh", 
+            f"{dados.get('potencia_kit', 7.32)} kWp"
         ]
     ], [115, 115, 115, 115] 
     
@@ -145,11 +145,11 @@ def render_proposta_p5(dados: dict, documento):
     documento.drawImage(file_route("comparativo.png"), sheet_padding_left, y, width=15.5*CM, height=1.69*CM)
 
     meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-    consumo = [3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705, 3705]
-    geracao = [4446, 4323, 4261, 3705, 3396, 3273, 3396, 3890, 4446, 4508, 4631, 4570]
+    consumo = [dados.get('CONSUMO_MES_INICIAL', 800)]*12
+    geracao = [v*dados.get('CONSUMO_MES_INICIAL', 800)/6.38 for v in [6.38,6.16,6.03,5.24,4.83,4.58,4.82,5.55,6.32,6.4,6.5,6.38]]
     
     largura_desenho = 17.09 * CM
-    altura_desenho = 8.0 * CM  
+    altura_desenho = 8.0 * CM
     
     d = Drawing(largura_desenho, altura_desenho)
     
@@ -169,8 +169,8 @@ def render_proposta_p5(dados: dict, documento):
     bc.bars[1].strokeColor = None
     
     bc.valueAxis.valueMin = 0
-    bc.valueAxis.valueMax = 5000
-    bc.valueAxis.valueStep = 1000
+    bc.valueAxis.valueMax = max(max(geracao), max(consumo)) * 1.2
+    bc.valueAxis.valueStep = round(round(max(geracao) / 5)/150)*150
     
     bc.categoryAxis.labels.fontName = 'TrebuchetMS'
     bc.categoryAxis.labels.fontSize = 8
@@ -209,16 +209,14 @@ def render_proposta_p6(dados: dict, documento):
     # -------------------------------------------------------------------------
     # ESTRUTURAÇÃO DOS DADOS DA TABELA
     # -------------------------------------------------------------------------
-    # Buscando a imagem do inversor (substitua pelo caminho correto no seu projeto)
-    caminho_imagem = file_route("inversor weg.png") 
-    img_inversor = Image(caminho_imagem, width=2.5*CM, height=2.5*CM)
+    img_inversor = Image(file_route("inversor weg.png"), width=2.5*CM, height=2.5*CM)
 
     # Texto longo da descrição formatado com quebras de linha para a tabela respeitar
     descricao_texto = (
         "DESCRIÇÃO:\n"
-        f"{dados.get('qtd_modulos', '47')} MÓDULO FOTOVOLTAICO 615W - WEG BIFACIAL\n"
-        f"{dados.get('qtd_inversores', '01')} INVERSOR FOTOVOLTAICO SIW400G T020 W1, Trifásico 380V\n"
-        "ESTRUTURA DE FIXAÇÃO METÁLICA\n"
+        f"{dados.get('qtd_modulos', '12')} MÓDULO {dados.get('modulos',{'modelo': '--.--'}).get('modelo')}\n"
+        f"{dados.get('qtd_inversores', '01')} INVERSOR {dados.get('inversores', {'marca': 'WEG'}).get('marca', 'WEG')} {dados.get('inversores', {'modelo': '615 Wp - WEG BIFACIAL'}).get('modelo','615 Wp - WEG BIFACIAL')}\n"
+        f"ESTRUTURA DE FIXAÇÃO {dados.get('estrutura', {'tipo': 'Fibrocimento'}).get('tipo','Fibrocimento')}\n"
         "KIT COMPLETO DE INSTALAÇÃO"
     )
 
@@ -298,9 +296,9 @@ def render_proposta_p6(dados: dict, documento):
     documento.drawImage(file_route("garantias.png"), sheet_padding_left, y, width=10.9*CM, height=1.77*CM)
 
     garantias =[
-        ['Painel',dados.get('garantias', {}).get('painel', 'N/A'),'serviço', dados.get('garantias', {}).get('instalacao', 'N/A')],
+        ['Painel',dados.get('garantias', {'painel': 'N/A'}).get('painel', 'N/A'),'serviço', dados.get('garantias', {'instalacao': 'N/A'}).get('instalacao', 'N/A')],
         # [None,None,None,None],
-        ['Inversor',dados.get('garantias', {}).get('inversor', 'N/A'),'Estrutura', dados.get('garantias', {}).get('estrutura', 'N/A')]
+        ['Inversor',dados.get('garantias', {'inversor': 'N/A'}).get('inversor', 'N/A'),'Estrutura', dados.get('garantias', {'estrutura': 'N/A'}).get('estrutura', 'N/A')]
     ]
 
     tabela_garantias = Table(garantias, colWidths=[4.5*CM, 3.5*CM, 4.5*CM, 3.5*CM])
@@ -523,8 +521,8 @@ def gen_finace_data(dados: dict):
     
     custos = []
     for i in range(0, 25):
-        monitoramewnto = (dados.get('modulos', {}).get('quantidade', 12) * dados.get('Potencia_modulos', 610) * CONSTS.get('CONST_IRRAD',139) / 2500)
-        limpeza = (25 * dados.get('modulos', {}).get('quantidade', 12))
+        monitoramewnto = (dados.get('modulos', {'quantidade': 12}).get('quantidade', 12) * dados.get('Potencia_modulos', 610) * CONSTS.get('CONST_IRRAD',139) / 2500)
+        limpeza = (25 * dados.get('modulos', {'quantidade': 12}).get('quantidade', 12))
         custos.append((monitoramewnto + limpeza) * (( 1 + CONSTS.get('MANUTENCAO_INFLACAO_ANUAL', 0.03))**i))
     custos[0] = dados.get('valor', 00.00 )
 
@@ -792,7 +790,7 @@ def render_proposta_p10(dados: dict, documento):
     Paragraphs = [
         [Paragraph('Desde já, agradecemos pela confiança. Espero que possamos trabalhar juntos para garantir a vocês todos os benefícios que a energia solar pode proporcionar.', estilo_texto)],
         [Paragraph('Para esclarecer qualquer dúvida, conte com nosso atendimento, estaremos de prontidão para você.', estilo_texto)],
-        [Paragraph(f'Essa proposta tem validade de {dados.get("CONSTS", {}).get("validade_proposta", "30 dias")}.', estilo_texto)],
+        [Paragraph(f'Essa proposta tem validade de {dados.get("CONSTS", {"validade_proposta": "30 dias"}).get("validade_proposta", "30 dias")}.', estilo_texto)],
     ]
     tabela = Table(Paragraphs, colWidths=[A4[0]-2*sheet_padding_left])
     tabela.setStyle(TableStyle([
@@ -849,7 +847,7 @@ dados={
         "TARIFA_INFLACAO_ANUAL": 0.08,
         "MANUTENCAO_INFLACAO_ANUAL": 0.03
     },
-    "Area_total": 21.44,
+    "area_total": 21.44,
     "valor": 16342.95,
     "garantias": {"painel": "10 anos", "inversor": "10 anos", "estrutura": "10 anos", "instalacao": "1 ano"},
     "economia_total":"errado aqui oh",
@@ -857,7 +855,9 @@ dados={
     "forma_pagamento": "Financiamento Solfacil",
     "condicao_pagamento": "Entrada de 30% e o restante em 12x sem juros",
     "retorno_investimento": "1 ano e 3 meses",
-    "modulos":{"potencia": 610, "quantidade": 12, "marca": "WEG", "modelo": "615 Wp - WEG BIFACIAL"},
+    "modulos": {"potencia": 610, "marca": "WEG", "modelo": "615 Wp - WEG BIFACIAL", "quantidade": 12, "area": 2.39*1.14},
+    "inversor":{"potencia": 5.0, "marca": "WEG", "modelo": "SIW 200G M050 W00"    , "quantidade": 1, "tipo": "Monofásico"},
+    "estrutura": {"tipo": "Fibrocimento", "marca": "WEG", "quantidade": 12},
     "CONSUMO_MES_INICIAL": 800,
     "validade_proposta": "30 dias"
     }
