@@ -24,6 +24,8 @@ sheet_padding_top = 20
 sheet_padding_left = 1*CM
 font_size = 12
 
+def tousand_separator(value):
+    return f'{value:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
 
 def file_route(filename: str, src_path: str='render/src/imagens'):
     if not filename:
@@ -114,8 +116,8 @@ def render_proposta_p5(dados: dict, documento):
     dados_tabela, largura_colunas = [
         ['PRODUÇÃO MÉDIA', 'ÁREA TOTAL', 'PRODUÇÃO ANUAL', 'POTÊNCIA DO SISTEMA'],
         [
-            f"{dados.get('potencia_kit', 7.32) * dados.get('CONST_IRRAD', 139)} kWh", 
-            f"{dados.get('modulos', {'area': 2.39*1.14}).get('area', 0)*dados.get('modulos', {'quantidade': 12}).get('quantidade', 0)*1.1} m²", 
+            f"{(dados.get('potencia_kit', 7.32) * dados.get('CONST_IRRAD', 139)):.2f} kWh", 
+            f"{(dados.get('modulos', {'area': 2.39*1.14}).get('area', 0)*dados.get('modulos', {'quantidade': 12}).get('quantidade', 0)*1.1):.2f} m²", 
             f"{dados.get('potencia_kit', 7.32) * 12 * dados.get('CONST_IRRAD', 139)} kWh", 
             f"{dados.get('potencia_kit', 7.32)} kWp"
         ]
@@ -148,7 +150,7 @@ def render_proposta_p5(dados: dict, documento):
 
     meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
     consumo = [dados.get('CONSUMO_MES_INICIAL', 800)]*12
-    geracao = [v*dados.get('CONSUMO_MES_INICIAL', 800)/6.38 for v in [6.38,6.16,6.03,5.24,4.83,4.58,4.82,5.55,6.32,6.4,6.5,6.38]]
+    geracao = [v*dados.get('potencia_kit', 7.32)*139/6.38 for v in [6.38,6.16,6.03,5.24,4.83,4.58,4.82,5.55,6.32,6.4,6.5,6.38]]
     
     largura_desenho = 17.09 * CM
     altura_desenho = 8.0 * CM
@@ -227,7 +229,7 @@ def render_proposta_p6(dados: dict, documento):
         # Linha 0: Cabeçalho
         ['ITEM', 'QUANTIDADE', 'IMAGEM'],
         # Linha 1: Dados principais do Kit
-        [f"KIT {dados.get('potencia_kit', '--.--')} kwp WEG metálico", "1", img_inversor],
+        [f"KIT {dados.get('potencia_kit', '--.--')} kwp WEG LAJE", "1", img_inversor],
         # Linhas 2: Reservada para a descrição longa expandida (via SPAN)
         [dados.get('descricao', ''), '', '']
     ]
@@ -284,7 +286,7 @@ def render_proposta_p6(dados: dict, documento):
     
     tabela.drawOn(documento, (A4[0] - tabela_width) / 2, y)
 
-    tabela_=Table([[f"Valor total: R$ {dados.get('valor', '0.00')}"]], colWidths=[A4[0]-3*CM])
+    tabela_=Table([[f"Valor total: R$ {tousand_separator(dados.get('valor', '0.00'))}"]], colWidths=[A4[0]-3*CM])
     tabela_.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), HexColor("#000000")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#fbfbfb')),
@@ -497,8 +499,6 @@ def render_grafico_investimento(dados: dict, documento, y=A4[1]):
     return documento
 
 def gen_finace_data(dados: dict):
-    def tousand_separator(value):
-        return f'{value:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
     # fator_diurno, consumo_mes, TUSDgd = 0.5, 3700, 0.2 
     CONSTS=dados.get("CONSTS", {})
 #    "CONSTS": {
@@ -512,12 +512,14 @@ def gen_finace_data(dados: dict):
     fluxo_caixa_acumulado = []
     energia_gerada = [12 * dados.get('potencia_kit', 7.32) * CONSTS.get('CONST_IRRAD', 139) * (1-CONSTS.get('DECRESCIMO_GERACAO', 0.0081))**i for i in range(0, 25)]
     tarifas        = [CONSTS.get('TARIFA_INICIAL', 1.22) * ((1+CONSTS.get('TARIFA_INFLACAO_ANUAL', 0.08))**i) for i in range(0, 25)]
-    consumo_ano    = [CONSTS.get('CONSUMO_MES_INICIAL', 800) * 12*(( 1 + CONSTS.get('CRECIMENTO_ANUAL_CONSUMO', 0.2))**i) for i in range(0, 25)]
+    consumo_ano    = [0.8 * dados.get('potencia_kit', 7.32) * CONSTS.get('CONST_IRRAD', 139) * 12*(( 1 + CONSTS.get('CRECIMENTO_ANUAL_CONSUMO', 0.2))**i) for i in range(0, 25)]
     C_geracao =[]
     for tarifa, energia, consumo in zip(tarifas, energia_gerada, consumo_ano):
-        if energia >= consumo:
-            C_geracao.append(energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) * ( 1 + CONSTS.get('CONST_TUSDgd', 0.2)))
-        else:C_geracao.append((energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) * ( 1 + CONSTS.get('CONST_TUSDgd', 0.2)))+(consumo-energia)*tarifa)
+        val = energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) *  CONSTS.get('CONST_TUSDgd', 0.2)
+        if energia <= consumo:
+            val += +((consumo-energia)*tarifa)
+        C_geracao.append(val)
+    
     # print("--------------------\n",C_geracao,"\n--------------------\n")
     S_geracao = [t*c for t, c in zip(tarifas, consumo_ano)]
     
@@ -530,13 +532,19 @@ def gen_finace_data(dados: dict):
 
     economia = [s - c for s, c in zip(S_geracao, C_geracao)]
     fluxo_caixa = [e - c for e, c in zip(economia, custos)]
-    fluxo_caixa_acumulado = [sum(fluxo_caixa[0:i]) for i in range(1, 25)]
+    fluxo_caixa_acumulado = [sum(fluxo_caixa[0:i]) for i in range(1, 26)]
 
     ano_ = [2034, 2033, 2032, 2031, 2030, 2029, 2028, 2027, 2026,"Ano"]
     C_geracao_mes, S_geracao_mes = [ f"R$ {tousand_separator(e/12)}" for e in C_geracao[9::-1]], [ f"R$ {tousand_separator(e/12)}" for e in S_geracao[9::-1]]
-    [ f"R$ {tousand_separator(e/12)}" for e in C_geracao[9::-1]]
-    # print(C_geracao_mes)
-    economia_percentual, economia_mes = [f"{(1-(float(c.replace('R$ ', '').replace(',', '')) / float(s.replace('R$ ', '').replace(',', '')))):.2%}" for s, c in zip(S_geracao_mes[9::-1], C_geracao_mes[9::-1])], [f"R$ {tousand_separator(float(s.replace('R$ ', '').replace(',', '')) - float(c.replace('R$ ', '').replace(',', '')))}" for s, c in zip(S_geracao_mes[9::-1], C_geracao_mes[9::-1])]
+    c_gem, s_gem = [ e/12 for e in C_geracao[9::-1]], [ e/12 for e in S_geracao[9::-1]]
+    
+    economia_percentual =[f'{(1-(c / s)):.2%}' for s, c in zip(s_gem, c_gem)]
+    print("------------")
+    print(S_geracao)
+    print(s_gem)
+    print("------------")
+    economia_mes = [ f"R$ {tousand_separator(s-c)}" for s, c in zip(s_gem, c_gem)]
+    
     C_geracao_mes.append("Com Geração")
     S_geracao_mes.append("Sem Geração")
     economia_percentual.append("Economia %")
@@ -554,7 +562,7 @@ def render_proposta_p7(dados: dict, documento):
     y = A4[1] - 1.61*CM - sheet_padding_top
     documento.drawImage(file_route("investimento.png"), sheet_padding_left, y, width=17.49*CM, height=1.61*CM)
     dados_investimento = [
-        ('PREÇO DO SISTEMA INSTALADO: ', f"R$ {dados.get('valor', '0.00')}"),
+        ('PREÇO DO SISTEMA INSTALADO: ', f"R$ {tousand_separator(dados.get('valor', '0.00'))}"),
         ('PRAZO DE INSTALAÇÃO: ', f"{dados.get('prazo_instalacao', '0')} Dias"),
         ('FORMA DE PAGAMENTO: ', dados.get('forma_pagamento', 'N/A')),
         ('CONDIÇÃO DE PAGAMENTO: ', dados.get('condicao_pagamento', 'N/A')),
@@ -828,8 +836,8 @@ def render_proposta(dados: dict):
     documento = render_proposta_p9(dados, documento)
     documento = render_proposta_p10(dados, documento)
     return documento
-
-dados={
+if __name__ == "__main__":
+    dados={
     "id": 1,
     "nome": "Eliel Júlio Soares da Silva",
     "endereco": "Rua das Flores, 123 - Petrolina, PE",
@@ -862,4 +870,5 @@ dados={
     "CONSUMO_MES_INICIAL": 800,
     "validade_proposta": "30 dias"
     }
-render_proposta(dados).save()
+
+    render_proposta(dados).save()

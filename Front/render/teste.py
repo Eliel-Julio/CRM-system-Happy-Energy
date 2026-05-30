@@ -1,0 +1,37 @@
+import render
+
+if __name__ == "__main__":
+    dados={
+    "id": 3,
+    "nome": "Elisângela Oliveira",
+    "endereco": "",
+    "descricao": "30 MÓDULO FOTOVOLTAICO 615 Wp - WEG BIFACIAL \n01 INVERSOR FOTOVOLTAICO SIW500H T015 W00, Inversor Trifásico 380 V \nESTRUTURA DE FIXAÇÃO LAJE \nKIT COMPLETO DE INSTALAÇÃO",
+    "data": "2026-04-29",
+    "telefone": "",
+    "email": "",
+    "potencia_kit": 18.45,
+    "cidade-uf":"Juazeir-BA",
+    "CONSTS": {
+        "CONST_IRRAD": 139,
+        "CONST_FATOR_DIURNO": 0.5,
+        "CONST_TUSDgd": 0.2,
+        "CRECIMENTO_ANUAL_CONSUMO": 0.2,
+        "DECRESCIMO_GERACAO": 0.0081,
+        "TARIFA_INICIAL": 1.22,
+        "TARIFA_INFLACAO_ANUAL": 0.08,
+        "MANUTENCAO_INFLACAO_ANUAL": 0.03
+    },
+    "valor": 49900.00,
+    "garantias": {"painel": "12 anos", "inversor": "10 anos", "estrutura": "10 anos", "instalacao": "1 ano"},
+    "prazo_instalacao": 60,
+    "forma_pagamento": "",
+    "condicao_pagamento": "",
+    "retorno_investimento": "1 ano e 3 meses",
+    "modulos": {"potencia": 615 , "marca": "WEG", "modelo": "615 Wp - WEG BIFACIAL", "quantidade": 30, "area": 2.39*1.14},
+    "inversor":{"potencia": 15.0, "marca": "WEG", "modelo": "SIW500H T015 W00", "quantidade": 1, "tipo": "Trifásico 380 V"},
+    "estrutura": {"tipo": "Laje", "marca": "WEG", "quantidade": 30},
+    "CONSUMO_MES_INICIAL": 30*615*0.139*0.8,
+    "validade_proposta": "30 dias"
+    }
+    render.render_proposta(dados).save()
+    # print(render.tousand_separator(8167.20))

@@ -1,6 +1,7 @@
 from pathlib import Path
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, FLOAT, JSON, Enum
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from datetime import datetime as dt
 
 # Garantir que o arquivo sqlite `crm.db` seja criado no mesmo diretório deste arquivo
 _db_file = Path(__file__).resolve().parent / "crm.db"
@@ -16,13 +17,13 @@ def produto(list:list, t=1):
 class propriedade(base):
     __tablename__ = 'propriedades'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    nome = Column(String, nullable=False)
+    nome = Column(String, nullable=False, unique=True)
     valor = Column(String, nullable=False)
     tipo = Column(Enum('float', 'int', 'str', 'boolean'), nullable=False)
 
     def __init__(self, nome, valor, tipo):
         if tipo not in ('float', 'int', 'str', 'boolean'):
-            raise KeyError("Incorect type description, pleas entry on off ('float', 'int', 'str', 'boolean')")
+            raise KeyError(f"Incorect type description <<{tipo}>> , pleas entry on off ('float', 'int', 'str', 'boolean')")
         self.nome = nome
         self.tipo = tipo
         self.set_valor(valor)
@@ -63,17 +64,33 @@ class kit(base):
     nome = Column(String, nullable=False)
     descricao = Column(String, nullable=False)
     preco_c = Column(FLOAT, nullable=False)
-    n_modulos = Column(Integer, default=0)
-    p_modulos = Column(FLOAT, default=0.0)
-    inversor = Column(String, default=False)
+    modulos_json = Column(JSON, nullable=False)
+    inversor_json = Column(JSON, nullable=False)
+    estrutura_json = Column(JSON, nullable=False)
+    garantias_json = Column(JSON, nullable=False)
     
-    def __init__(self, nome, descricao, preco_c, n_modulos=0, inversor=False, p_modulos=0.0):
+
+    # "modulos": {"potencia": 610, "marca": "WEG", "modelo": "615 Wp - WEG BIFACIAL", "quantidade": 12, "area": 2.39*1.14},
+    # "inversor":{"potencia": 5.0, "marca": "WEG", "modelo": "SIW 200G M050 W00"    , "quantidade": 1, "tipo": "Monofásico"},
+    # "estrutura": {"tipo": "Fibrocimento", "marca": "WEG", "quantidade": 12},
+
+    def __init__(self, nome, descricao, preco_c, modulos:dict, inversor:dict, estrutura:dict, garantias:dict):
+        for key in ("potencia", "marca", "modelo", "quantidade", "tipo"):
+            if key not in modulos.keys():raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário inversor!")
+        for key in ("potencia","marca", "modelo", "quantidade","area"):
+            if key not in inversor.keys():raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário modulos!")
+        for key in ("tipo", "marca", "quantidade"):
+            if key not in estrutura.keys:raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário estrutura!")
+        for key in ("painel", "inversor", "estrutura", "instalacao"):
+            if key not in garantias.keys:raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário garantias!")
+        self.modulos_json = modulos
+        self.inversor_json = inversor
+        self.estrutura_json = estrutura
+        self.garantias_json = garantias
         self.nome = nome
         self.descricao = descricao
         self.preco_c = preco_c
-        self.n_modulos = n_modulos
         self.inversor = inversor
-        self.p_modulos = p_modulos
 
 class cliente(base):
     __tablename__ = 'clientes'
@@ -82,15 +99,15 @@ class cliente(base):
     cpf = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False)
     telefone = Column(String, nullable=False)
-    cidade_UF = Column(String, nullable=False)
+    cidade_uf = Column(String, nullable=False)
     endereco = Column(String, nullable=True)
 
-    def __init__(self, nome, cpf, email, telefone, cidade_UF, endereco=None):
+    def __init__(self, nome:String, cpf:String, email:String, telefone:String, cidade_uf:String, endereco:String):
         self.nome = nome
         self.cpf = cpf
         self.email = email
         self.telefone = telefone
-        self.cidade_UF = cidade_UF
+        self.cidade_uf = cidade_uf
         self.endereco = endereco
 
 class proposta(base):
@@ -100,34 +117,41 @@ class proposta(base):
     kit_id = Column(Integer, ForeignKey('kits.id'), nullable=False)
     valor_total = Column(FLOAT, nullable=False)
 
-    kit = Column(JSON, nullable=False)
-    
-    cliente = relationship("cliente")
-    kit = relationship("kit")
+    kit_json = Column(JSON, nullable=False)
+    cliente_json = Column(JSON, nullable=False)
+
+    cliente_rel = relationship("cliente")
+    kit_rel = relationship("kit")
 
     def __init__(self, cliente_id, kit_id):
         self.cliente_id = cliente_id
         
         self.kit_id = kit_id
-        self.kit = self.kit_data(kit_id)
-        
+        self.kit_json = self.kit_data(kit_id)
+
         self.cliente_id = cliente_id
-        self.cliente = self.cliente_data(cliente_id)
+        self.cliente_json = self.cliente_data(cliente_id)
 
         self.consts = {obj.nome:obj.valor for obj in session.query(propriedade).all()}
-        
         self.valor_total = self.Def_valor_total()
+        self.data = dt.today().strftime("%d/%m/%Y")
 
-    def Def_valor_total(self,instal=60, extra=350 , rates={"margim":0.3,"tax":0.07, "commission":0.00}):return (self.kit.preco_c + (self.kit.n_modulos * instal) + extra)*produto([1+t for t in rates.values()])
+    def Def_valor_total(self,instal=60, extra=350 , rates={"margim":0.3,"tax":0.07, "commission":0.00}):return (self.kit_json["preco_c"] + (self.kit_json["n_modulos"] * instal) + extra)*produto([1+t for t in rates.values()])
 
-    def cliente_data(id):
-        cliente_=session.query(cliente).filter_by(id=id).first()
-        if cliente_:return{chave:valor for chave, valor in enumerate(cliente_)}
+    def cliente_data(self, id_):
+        cliente_=session.query(cliente).filter_by(id=id_).first()
+        if cliente_:
+            c = cliente_.__dict__
+            c.pop('_sa_instance_state',None)
+            return c
         raise KeyError("Cliente não encontrado")
 
-    def kit_data(id):
-        kit_ = session.query(kit).filter_by(id=id).first()
-        if kit_:return{chave: valor for chave, valor in enumerate(kit_)}
+    def kit_data(self, id_):
+        kit_ = session.query(kit).filter_by(id=id_).first()
+        if kit_:
+            k = kit_.__dict__
+            k.pop('_sa_instance_state',None)
+            return k
         raise KeyError("Kit não encontrado")
 
 base.metadata.create_all(bind=engine)
