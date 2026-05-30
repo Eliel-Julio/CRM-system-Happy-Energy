@@ -5,7 +5,7 @@ from Database.models import *
 @app.route('/get_leads', methods=['GET'])
 def get_leads():
     leads = session.query(cliente).all()
-    return jsonify([{'id': lead.id, 'nome': lead.nome, 'email': lead.email, 'telefone': lead.telefone, 'cidade_UF': lead.cidade_UF} for lead in leads])
+    return jsonify([{'id': lead.id, 'nome': lead.nome, 'email': lead.email, 'telefone': lead.telefone, 'cidade_uf': lead.cidade_uf} for lead in leads])
 
 @app.route('/novo_lead', methods=['POST'])
 def novo_lead():
@@ -18,7 +18,7 @@ def novo_lead():
         cpf=dados.get('cpf'),
         email=dados.get('email'),
         telefone=dados.get('telefone'),
-        cidade_UF=dados.get('cidade_UF')
+        cidade_uf=dados.get('cidade_uf')
     )
     
     session.add(cliente_obj)

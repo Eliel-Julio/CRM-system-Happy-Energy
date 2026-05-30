@@ -80,9 +80,9 @@ class kit(base):
         for key in ("potencia","marca", "modelo", "quantidade","area"):
             if key not in inversor.keys():raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário modulos!")
         for key in ("tipo", "marca", "quantidade"):
-            if key not in estrutura.keys:raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário estrutura!")
+            if key not in estrutura.keys():raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário estrutura!")
         for key in ("painel", "inversor", "estrutura", "instalacao"):
-            if key not in garantias.keys:raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário garantias!")
+            if key not in garantias.keys():raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário garantias!")
         self.modulos_json = modulos
         self.inversor_json = inversor
         self.estrutura_json = estrutura
