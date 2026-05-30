@@ -13,6 +13,20 @@
             gap: 0.5rem;
             margin-top: 0.5rem;
         }
+
+        /* Separador de seções do formulário */
+        .form-section-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #6c757d;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.25rem;
+            margin: 1rem 0 0.5rem;
+            grid-column: 1 / -1;
+        }
+
         .kit-item {
             background: white;
             border: 1px solid #e9ecef;
@@ -21,76 +35,88 @@
             margin-bottom: 0.75rem;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             transition: all 0.3s ease;
-            &:hover {
-                border-color: var(--primary-color);
-                box-shadow: 0 2px 6px rgba(46, 204, 113, 0.15);
-            }
-            .kit-info {
-                h5 {
-                    margin: 0 0 0.3rem 0;
-                    color: #212529;
-                    font-size: 0.95rem;
-                    font-weight: 600;
-                }
-                p{
-                    margin: 0.2rem 0;
-                    color: #6c757d;
-                    font-size: 0.85rem;
-                    line-height: 1.3;
-                    strong{
-                        color: #495057;
-                    }
-                }
-                .badge-custom {
-                    background-color: var(--primary-color);
-                    color: white;
-                    padding: 0.35rem 0.65rem;
-                    border-radius: 50px;
-                    font-size: 0.85rem;
-                }
-            }
-            .kit-actions {
-                display: flex;
-                gap: 0.35rem;
-                flex-shrink: 0;
-                margin-left: 1rem;
-                .btn{
-                    padding: 0.35rem 0.5rem;
-                    font-size: 0.8rem;
-                }
-            }
+        }
+        .kit-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 6px rgba(46, 204, 113, 0.15);
+        }
+        .kit-info h5 {
+            margin: 0 0 0.3rem 0;
+            color: #212529;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .kit-info p {
+            margin: 0.2rem 0;
+            color: #6c757d;
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+        .kit-info p strong { color: #495057; }
+        .badge-custom {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+        }
+        .kit-actions {
+            display: flex;
+            gap: 0.35rem;
+            flex-shrink: 0;
+            margin-left: 1rem;
+        }
+        .kit-actions .btn {
+            padding: 0.35rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        /* Modal */
+        .modal-kit .modal-header { background: var(--primary-color); color: white; }
+        .modal-kit .modal-title  { font-weight: 700; }
+        .modal-kit .detail-section { margin-bottom: 1rem; }
+        .modal-kit .detail-section h6 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6c757d;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.25rem;
+            margin-bottom: 0.4rem;
+        }
+        .modal-kit .detail-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            padding: 0.2rem 0;
+        }
+        .modal-kit .detail-row span:first-child { color: #6c757d; }
+        .modal-kit .detail-row span:last-child  { font-weight: 600; color: #212529; }
+        .modal-kit .preco-destaque {
+            background: #f8f9fa;
+            border-radius: 0.4rem;
+            padding: 0.6rem;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 0.5rem;
         }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-lightning-fill"></i> Happy Energy
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#"><i class="bi bi-box"></i> Kits</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/leads"><i class="bi bi-people"></i> Leads</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/propostas"><i class="bi bi-file-earmark-text"></i> Propostas</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+    <nav class="navbar">
+        {{url_for('index')}};
+        {{url_for('configuracoes')}};
+        {{url_for('kits')}};
+        {{url_for('leads')}};
+        {{url_for('propostas')}};
     </nav>
 
-    <!-- Hero Section -->
     <main class="container-fluid px-4 px-lg-5">
         <div class="hero-section">
             <div class="container">
@@ -100,85 +126,191 @@
         </div>
 
         <div class="container-lg">
-            <!-- Form Section: Adicionar Novo Kit -->
+
+            <!-- ── Formulário Novo Kit ─────────────────────────────── -->
             <div class="form-section">
                 <h3><i class="bi bi-plus-circle"></i> Novo Kit</h3>
                 <form id="formNovoKit">
                     <div class="form-grid-compact">
-                        <!-- Row 1: Informações Básicas -->
+
+                        <!-- Informações gerais -->
+                        <p class="form-section-title">Informações Gerais</p>
+
                         <div class="form-group-compact">
-                            <label for="nomeKit" class="form-label">Nome *</label>
-                            <input type="text" class="form-control" id="nomeKit" placeholder="Kit Solar 5kWp" required>
+                            <label for="nome" class="form-label">Nome *</label>
+                            <input type="text" class="form-control" id="nome" placeholder="Kit Solar 5 kWp" required>
                         </div>
+
                         <div class="form-group-compact">
-                            <label for="numModulosKit" class="form-label">Nº Módulos *</label>
-                            <input type="number" class="form-control" id="numModulosKit" step="1" placeholder="10" required>
+                            <label for="preco_c" class="form-label">Custo (R$) *</label>
+                            <input type="number" class="form-control" id="preco_c" step="0.01" min="0" placeholder="0,00" required>
                         </div>
-                        <div class="form-group-compact">
-                            <label for="potenciaModulos" class="form-label">Potência Módulo (W) *</label>
-                            <input type="number" class="form-control" id="potenciaModulos" step="1" placeholder="270" required>
-                        </div>
-                        <div class="form-group-compact">
-                            <label for="modeloInversorKit" class="form-label">Modelo Inversor *</label>
-                            <input type="text" class="form-control" id="modeloInversorKit" placeholder="Symo 5.0-3-M" required>
-                        </div>
-                        <div class="form-group-compact">
-                            <label for="custoProcKit" class="form-label">Custo (R$) *</label>
-                            <input type="number" class="form-control" id="custoProcKit" step="0.01" placeholder="0,00" required>
-                        </div>
+
                         <div class="form-group-compact form-grid-full">
-                            <label for="descricaoKit" class="form-label">Descrição</label>
-                            <textarea class="form-control" id="descricaoKit" rows="2" placeholder="Detalhes adicionais..."></textarea>
+                            <label for="descricao" class="form-label">Descrição *</label>
+                            <textarea class="form-control" id="descricao" rows="2" placeholder="Detalhes adicionais sobre o kit..." required></textarea>
                         </div>
-                    </div>
+
+                        <!-- Módulos -->
+                        <p class="form-section-title"><i class="bi bi-grid-3x3-gap me-1"></i>Módulos</p>
+
+                        <div class="form-group-compact">
+                            <label for="mod_potencia" class="form-label">Potência (Wp) *</label>
+                            <input type="number" class="form-control" id="mod_potencia" step="1" min="1" placeholder="610" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="mod_quantidade" class="form-label">Quantidade *</label>
+                            <input type="number" class="form-control" id="mod_quantidade" step="1" min="1" placeholder="12" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="mod_marca" class="form-label">Marca *</label>
+                            <input type="text" class="form-control" id="mod_marca" placeholder="WEG" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="mod_modelo" class="form-label">Modelo *</label>
+                            <input type="text" class="form-control" id="mod_modelo" placeholder="615 Wp - WEG BIFACIAL" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="mod_area" class="form-label">Área unitária (m²) *</label>
+                            <input type="number" class="form-control" id="mod_area" step="0.01" min="0" placeholder="2.73" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="mod_tipo" class="form-label">Tipo *</label>
+                            <select class="form-select" id="mod_tipo" required>
+                                <option value="">Selecione...</option>
+                                <option value="Monocristalino">Monocristalino</option>
+                                <option value="Policristalino">Policristalino</option>
+                                <option value="Bifacial">Bifacial</option>
+                                <option value="Filme fino">Filme fino</option>
+                            </select>
+                        </div>
+
+                        <!-- Inversor -->
+                        <p class="form-section-title"><i class="bi bi-cpu me-1"></i>Inversor</p>
+
+                        <div class="form-group-compact">
+                            <label for="inv_potencia" class="form-label">Potência (kW) *</label>
+                            <input type="number" class="form-control" id="inv_potencia" step="0.1" min="0" placeholder="5.0" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="inv_quantidade" class="form-label">Quantidade *</label>
+                            <input type="number" class="form-control" id="inv_quantidade" step="1" min="1" placeholder="1" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="inv_marca" class="form-label">Marca *</label>
+                            <input type="text" class="form-control" id="inv_marca" placeholder="WEG" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="inv_modelo" class="form-label">Modelo *</label>
+                            <input type="text" class="form-control" id="inv_modelo" placeholder="SIW 200G M050 W00" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="inv_tipo" class="form-label">Tipo *</label>
+                            <select class="form-select" id="inv_tipo" required>
+                                <option value="">Selecione...</option>
+                                <option value="Monofásico">Monofásico</option>
+                                <option value="Bifásico">Bifásico</option>
+                                <option value="Trifásico">Trifásico</option>
+                                <option value="Microinversor">Microinversor</option>
+                            </select>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="inv_area" class="form-label">Área (m²)</label>
+                            <input type="number" class="form-control" id="inv_area" step="0.01" min="0" placeholder="0.00">
+                        </div>
+
+                        <!-- Estrutura -->
+                        <p class="form-section-title"><i class="bi bi-building me-1"></i>Estrutura de Fixação</p>
+
+                        <div class="form-group-compact">
+                            <label for="est_tipo" class="form-label">Tipo *</label>
+                            <select class="form-select" id="est_tipo" required>
+                                <option value="">Selecione...</option>
+                                <option value="Fibrocimento">Fibrocimento</option>
+                                <option value="Cerâmico">Cerâmico</option>
+                                <option value="Metálico">Metálico</option>
+                                <option value="Solo">Solo</option>
+                                <option value="Laje">Laje</option>
+                            </select>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="est_marca" class="form-label">Marca *</label>
+                            <input type="text" class="form-control" id="est_marca" placeholder="WEG" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="est_quantidade" class="form-label">Quantidade *</label>
+                            <input type="number" class="form-control" id="est_quantidade" step="1" min="1" placeholder="12" required>
+                        </div>
+
+                        <!-- Garantias -->
+                        <p class="form-section-title"><i class="bi bi-shield-check me-1"></i>Garantias (anos)</p>
+
+                        <div class="form-group-compact">
+                            <label for="gar_painel" class="form-label">Painel *</label>
+                            <input type="number" class="form-control" id="gar_painel" step="1" min="0" placeholder="25" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="gar_inversor" class="form-label">Inversor *</label>
+                            <input type="number" class="form-control" id="gar_inversor" step="1" min="0" placeholder="10" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="gar_estrutura" class="form-label">Estrutura *</label>
+                            <input type="number" class="form-control" id="gar_estrutura" step="1" min="0" placeholder="10" required>
+                        </div>
+                        <div class="form-group-compact">
+                            <label for="gar_instalacao" class="form-label">Instalação *</label>
+                            <input type="number" class="form-control" id="gar_instalacao" step="1" min="0" placeholder="1" required>
+                        </div>
+
+                    </div><!-- /form-grid-compact -->
 
                     <div class="btn-form-group">
                         <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="bi bi-plus"></i> Adicionar
+                            <i class="bi bi-plus"></i> Adicionar Kit
                         </button>
                         <button type="reset" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-arrow-clockwise"></i> Limpar
                         </button>
                     </div>
                 </form>
-            </div>
+            </div><!-- /form-section -->
 
-            <!-- Kits List Section -->
+            <!-- ── Listagem de Kits ────────────────────────────────── -->
             <div class="section-card">
                 <div class="card-header">
                     <h2><i class="bi bi-list-ul"></i> Listagem de Kits</h2>
                 </div>
                 <div class="card-body">
-                    <!-- Filter and Search -->
                     <div class="row g-2 mb-2">
-                        <div class="col-md-6">
-                            <input type="text" class="form-control form-control-sm" id="searchKit" placeholder="Buscar por nome...">
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm" id="searchKit" placeholder="Buscar por nome, marca ou modelo...">
                         </div>
-                        <div class="col-md-6">
-                            <select class="form-select form-select-sm" id="filterCategoria">
-                                <option value="">Todas as categorias</option>
-                                <option value="solar">Solar</option>
-                                <option value="eolica">Eólica</option>
-                                <option value="hibrido">Híbrido</option>
-                                <option value="baterias">Baterias</option>
-                                <option value="outro">Outro</option>
-                            </select>
+                        <div class="col-md-4 text-end">
+                            <span class="text-muted small" id="totalKits"></span>
                         </div>
                     </div>
+                    <div id="kitsContainer"></div>
+                </div>
+            </div>
 
-                    <!-- Kits Container -->
-                    <div id="kitsContainer">
-                        <!-- Empty State -->
-                        <!-- <div class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <h5>Nenhum kit cadastrado</h5>
-                            <p>Adicione seu primeiro kit usando o formulário acima</p>
-                        </div> -->
-                    </div>
+        </div><!-- /container-lg -->
+    </main>
+
+    <!-- ── Modal Detalhes ──────────────────────────────────────────── -->
+    <div class="modal fade modal-kit" id="modalDetalheKit" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-box-seam me-2"></i>Detalhes do Kit</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalCorpoKit"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
     <!-- Footer -->
     <footer>
@@ -189,237 +321,226 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script>
-        // Gerenciamento de Kits
-        let kits = [];
+        const BASE = 'http://127.0.0.1:5000';
+        let kitsGlobal = [];
 
-        const formNovoKit = document.getElementById('formNovoKit');
-        const kitsContainer = document.getElementById('kitsContainer');
-        const searchKit = document.getElementById('searchKit');
-        const filterCategoria = document.getElementById('filterCategoria');
+        // ── Utilitários ────────────────────────────────────────────
+        function formatBRL(v) {
+            return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+        function mostrarAlerta(mensagem, tipo = 'info') {
+            const el = document.createElement('div');
+            el.className = `alert alert-${tipo} alert-dismissible fade show`;
+            el.role = 'alert';
+            el.innerHTML = `${mensagem}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            document.querySelector('.container-lg').insertBefore(el, document.querySelector('.container-lg').firstChild);
+            setTimeout(() => el.remove(), 4000);
+        }
 
-        // Adicionar novo kit
-        formNovoKit.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const novoKit = {
-                nome: document.getElementById('nomeKit').value,
-                numModulos: parseInt(document.getElementById('numModulosKit').value),
-                potenciaModulos: parseFloat(document.getElementById('potenciaModulos').value),
-                modeloInversor: document.getElementById('modeloInversorKit').value,
-                custoProd: parseFloat(document.getElementById('custoProcKit').value),
-                descricao: document.getElementById('descricaoKit').value
-
-                    // nome = Column(String, nullable=False)
-                    // n_modulos = Column(Integer, default=0)
-                    // p_modulos = Column(FLOAT, default=0.0)
-                    // inversor = Column(String, default=False)
-                    // preco_c = Column(FLOAT, nullable=False)
-                    // descricao = Column(String, nullable=False)
-            };
-
-            try {
-                const response = await fetch('http://127.0.0.1:5000/novo_kit', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(novoKit)
-                });
-
-                const resultado = await response.json();
-
-                if (response.ok) {
-                    novoKit.id = Date.now();
-                    kits.push(novoKit);
-                    formNovoKit.reset();
-                    renderizarKits();
-                    mostrarAlerta('Kit adicionado com sucesso na base de dados!', 'success');
-                } else {
-                    mostrarAlerta('Erro: ' + resultado.error, 'danger');
-                }
-            } catch (erro) {
-                mostrarAlerta('Erro ao enviar dados: ' + erro.message, 'danger');
-                console.error('Erro:', erro);
-            }
-            fetch('http://127.0.0.1:5000/get_kits')
-                .then(res => res.json())
+        // ── Carregar kits ──────────────────────────────────────────
+        function carregarKits() {
+            fetch(`${BASE}/get_kits`)
+                .then(r => r.json())
                 .then(data => {
-                    console.log("debug kits carregados", data);
-                    // console.log("debug kits carregados", kits);
+                    kitsGlobal = data;
                     renderizarKits(data);
                 })
-                .catch(erro => {
-                    mostrarAlerta('Erro ao carregar kits: ' + erro.message, 'danger');
-                    console.error('Erro:', erro);
-                })
-            
-        });
+                .catch(e => mostrarAlerta('Erro ao carregar kits: ' + e.message, 'danger'));
+        }
 
-        // Renderizar kits
-        function renderizarKits(kitsParaRenderizar) {
-            if (kitsParaRenderizar.length === 0) {
-                console.log("debug", "Nenhum kit para renderizar");
-                kitsContainer.innerHTML = `
+        // ── Renderizar kits ────────────────────────────────────────
+        function renderizarKits(lista) {
+            const container = document.getElementById('kitsContainer');
+            document.getElementById('totalKits').textContent =
+                lista.length === 1 ? '1 kit' : `${lista.length} kits`;
+
+            if (lista.length === 0) {
+                container.innerHTML = `
                     <div class="empty-state">
                         <i class="bi bi-inbox"></i>
                         <h5>Nenhum kit cadastrado</h5>
                         <p>Adicione seu primeiro kit usando o formulário acima</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
-            console.log("debug--", kitsParaRenderizar.length);
-            kitsContainer.innerHTML = kitsParaRenderizar.map(kit => `
+
+            container.innerHTML = lista.map(k => {
+                const mod = k.modulos_json  || {};
+                const inv = k.inversor_json || {};
+                const est = k.estrutura_json || {};
+                const potTotal = ((mod.potencia || 0) * (mod.quantidade || 0) / 1000).toFixed(2);
+                return `
                 <div class="kit-item">
                     <div class="kit-info">
-                        <h5>${kit.nome}</h5>
-                        <p><strong>Potência:</strong> ${kit.p_modulos} W | <strong>Módulos:</strong> ${kit.n_modulos} módulos</p>
-                        <p><strong>Inversor:</strong> ${kit.inversor} | <strong> preço de custo:</strong> R$ ${(kit.preco_c / 100).toFixed(2).replace('.', ',')}</p>
-                        ${kit.descricao ? `<p><em>${kit.descricao}</em></p>` : ''}
+                        <h5>
+                            ${k.nome}
+                            <span class="badge-custom ms-1">${potTotal} kWp</span>
+                        </h5>
+                        <p>
+                            <strong>Módulos:</strong> ${mod.quantidade || '—'} × ${mod.potencia || '—'} Wp
+                            (${mod.marca || '—'} — ${mod.modelo || '—'})
+                        </p>
+                        <p>
+                            <strong>Inversor:</strong> ${inv.marca || '—'} ${inv.modelo || '—'}
+                            &nbsp;|&nbsp;<strong>Tipo:</strong> ${inv.tipo || '—'}
+                        </p>
+                        <p>
+                            <strong>Estrutura:</strong> ${est.tipo || '—'} — ${est.marca || '—'}
+                            &nbsp;|&nbsp;<strong>Custo:</strong> ${formatBRL(k.preco_c)}
+                        </p>
+                        ${k.descricao ? `<p><em>${k.descricao}</em></p>` : ''}
                     </div>
                     <div class="kit-actions">
-                        <button class="btn btn-sm btn-outline-primary" onclick="editarKit(${kit.id})" title="Editar">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm btn-outline-info" onclick="verDetalhes(${k.id})" title="Detalhes">
+                            <i class="bi bi-eye"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deletarKit(${kit.id})" title="Deletar">
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletarKit(${k.id})" title="Deletar">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
-                </div>
-            `).join('');
-            
-        }
-        function deletarKit(kitId){
-            console.log("teste delet")
-            fetch("http://127.0.0.1:5000/deletar_kit/" + kitId, {
-                method: "DELETE"
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    mostrarAlerta(data.message, 'success');
-                    fetch('http://127.0.0.1:5000/get_kits')
-                        .then(res => res.json())
-                        .then(data => {
-                            renderizarKits(data);
-                        });
-                } else {
-                    mostrarAlerta('Erro: ' + data.error, 'danger');
-                }
-            })
-            .catch(erro => {
-                mostrarAlerta('Erro ao deletar kit: ' + erro.message, 'danger');
-                console.error('Erro:', erro);
-            });
+                </div>`;
+            }).join('');
         }
 
-        function editarKit(kitId){
-            fetch("http://127.0.0.1:5000/editar_kit/" + kitId, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
+        // ── Adicionar kit ──────────────────────────────────────────
+        document.getElementById('formNovoKit').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                nome:      document.getElementById('nome').value,
+                descricao: document.getElementById('descricao').value,
+                preco_c:   parseFloat(document.getElementById('preco_c').value),
+                modulos: {
+                    potencia:   parseFloat(document.getElementById('mod_potencia').value),
+                    quantidade: parseInt(document.getElementById('mod_quantidade').value),
+                    marca:      document.getElementById('mod_marca').value,
+                    modelo:     document.getElementById('mod_modelo').value,
+                    area:       parseFloat(document.getElementById('mod_area').value),
+                    tipo:       document.getElementById('mod_tipo').value,
                 },
-                body: JSON.stringify({
-                    // Adicione os dados do kit aqui
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    mostrarAlerta(data.message, 'success');
-                    fetch('http://127.0.0.1:5000/get_kits')
-                        .then(res => res.json())
-                        .then(data => {
-                            renderizarKits(data);
-                        });
+                inversor: {
+                    potencia:   parseFloat(document.getElementById('inv_potencia').value),
+                    quantidade: parseInt(document.getElementById('inv_quantidade').value),
+                    marca:      document.getElementById('inv_marca').value,
+                    modelo:     document.getElementById('inv_modelo').value,
+                    tipo:       document.getElementById('inv_tipo').value,
+                    area:       parseFloat(document.getElementById('inv_area').value) || 0,
+                },
+                estrutura: {
+                    tipo:       document.getElementById('est_tipo').value,
+                    marca:      document.getElementById('est_marca').value,
+                    quantidade: parseInt(document.getElementById('est_quantidade').value),
+                },
+                garantias: {
+                    painel:     parseInt(document.getElementById('gar_painel').value),
+                    inversor:   parseInt(document.getElementById('gar_inversor').value),
+                    estrutura:  parseInt(document.getElementById('gar_estrutura').value),
+                    instalacao: parseInt(document.getElementById('gar_instalacao').value),
+                },
+            };
+
+            try {
+                const res = await fetch(`${BASE}/novo_kit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const resultado = await res.json();
+                if (res.ok) {
+                    document.getElementById('formNovoKit').reset();
+                    mostrarAlerta('Kit adicionado com sucesso!', 'success');
+                    carregarKits();
                 } else {
-                    mostrarAlerta('Erro: ' + data.error, 'danger');
+                    mostrarAlerta('Erro: ' + (resultado.error || 'Falha ao criar kit'), 'danger');
                 }
-            })
-            .catch(erro => {
-                mostrarAlerta('Erro ao editar kit: ' + erro.message, 'danger');
-                console.error('Erro:', erro);
-            });
-        }
-
-        // Buscar e filtrar
-        function filtrarKits() {
-            const busca = searchKit.value.toLowerCase();
-            const categoria = filterCategoria.value;
-
-            const kitsFiltrados = kits.filter(kit => {
-                const correspondeNome = kit.nome.toLowerCase().includes(busca);
-                const correspondeCategoria = !categoria || kit.categoria === categoria;
-                return correspondeNome && correspondeCategoria;
-            });
-
-            if (kitsFiltrados.length === 0) {
-                kitsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="bi bi-search"></i>
-                        <h5>Nenhum kit encontrado</h5>
-                        <p>Tente ajustar seus filtros</p>
-                    </div>
-                `;
-                return;
+            } catch (err) {
+                mostrarAlerta('Erro ao enviar dados: ' + err.message, 'danger');
             }
+        });
 
-            kitsContainer.innerHTML = kitsFiltrados.map(kit => `
-                <div class="kit-item">
-                    <div class="kit-info">
-                        <h5>${kit.nome} <span class="badge-custom">${kit.categoria}</span></h5>
-                        <p><strong>Potência:</strong> ${kit.potencia} kWp | <strong>Módulos:</strong> ${kit.numModulos}x ${kit.marcaModulo}</p>
-                        <p><strong>Inversor:</strong> ${kit.marcaInversor} ${kit.modeloInversor} | <strong>Custo:</strong> R$ ${kit.custoProd.toFixed(2).replace('.', ',')}</p>
-                        <p><strong>Venda:</strong> R$ ${kit.precoVenda.toFixed(2).replace('.', ',')} ${kit.descricao ? `| <em>${kit.descricao}</em>` : ''}</p>
-                    </div>
-                    <div class="kit-actions">
-                        <button class="btn btn-sm btn-outline-primary" onclick="editarKit(${kit.id})" title="Editar">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deletarKit(${kit.id})" title="Deletar">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
+        // ── Deletar kit ────────────────────────────────────────────
+        function deletarKit(id) {
+            if (!confirm('Deseja realmente excluir este kit?')) return;
+            fetch(`${BASE}/deletar_kit/${id}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarAlerta(data.message, 'success');
+                        carregarKits();
+                    } else {
+                        mostrarAlerta('Erro: ' + data.error, 'danger');
+                    }
+                })
+                .catch(e => mostrarAlerta('Erro ao deletar: ' + e.message, 'danger'));
+        }
+
+        // ── Modal detalhes ─────────────────────────────────────────
+        function verDetalhes(id) {
+            const k = kitsGlobal.find(x => x.id === id);
+            if (!k) return;
+            const mod = k.modulos_json   || {};
+            const inv = k.inversor_json  || {};
+            const est = k.estrutura_json || {};
+            const gar = k.garantias_json || {};
+            const potTotal = ((mod.potencia || 0) * (mod.quantidade || 0) / 1000).toFixed(2);
+
+            document.getElementById('modalCorpoKit').innerHTML = `
+                <div class="detail-section">
+                    <h6><i class="bi bi-info-circle me-1"></i>Geral</h6>
+                    <div class="detail-row"><span>Nome</span><span>${k.nome}</span></div>
+                    <div class="detail-row"><span>Potência Total</span><span>${potTotal} kWp</span></div>
+                    <div class="detail-row"><span>Descrição</span><span>${k.descricao || '—'}</span></div>
                 </div>
-            `).join('');
-        }
-
-        searchKit.addEventListener('input', filtrarKits);
-        filterCategoria.addEventListener('change', filtrarKits);
-
-        // Mostrar alerta
-        function mostrarAlerta(mensagem, tipo = 'info') {
-            const alerta = document.createElement('div');
-            alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
-            alerta.role = 'alert';
-            alerta.innerHTML = `
-                ${mensagem}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="detail-section">
+                    <h6><i class="bi bi-grid-3x3-gap me-1"></i>Módulos</h6>
+                    <div class="detail-row"><span>Marca / Modelo</span><span>${mod.marca || '—'} — ${mod.modelo || '—'}</span></div>
+                    <div class="detail-row"><span>Potência unitária</span><span>${mod.potencia || '—'} Wp</span></div>
+                    <div class="detail-row"><span>Quantidade</span><span>${mod.quantidade || '—'} un</span></div>
+                    <div class="detail-row"><span>Área unitária</span><span>${mod.area || '—'} m²</span></div>
+                    <div class="detail-row"><span>Tipo</span><span>${mod.tipo || '—'}</span></div>
+                </div>
+                <div class="detail-section">
+                    <h6><i class="bi bi-cpu me-1"></i>Inversor</h6>
+                    <div class="detail-row"><span>Marca / Modelo</span><span>${inv.marca || '—'} — ${inv.modelo || '—'}</span></div>
+                    <div class="detail-row"><span>Potência</span><span>${inv.potencia || '—'} kW</span></div>
+                    <div class="detail-row"><span>Quantidade</span><span>${inv.quantidade || '—'} un</span></div>
+                    <div class="detail-row"><span>Tipo</span><span>${inv.tipo || '—'}</span></div>
+                </div>
+                <div class="detail-section">
+                    <h6><i class="bi bi-building me-1"></i>Estrutura</h6>
+                    <div class="detail-row"><span>Tipo</span><span>${est.tipo || '—'}</span></div>
+                    <div class="detail-row"><span>Marca</span><span>${est.marca || '—'}</span></div>
+                    <div class="detail-row"><span>Quantidade</span><span>${est.quantidade || '—'} un</span></div>
+                </div>
+                <div class="detail-section">
+                    <h6><i class="bi bi-shield-check me-1"></i>Garantias</h6>
+                    <div class="detail-row"><span>Painel</span><span>${gar.painel || '—'} anos</span></div>
+                    <div class="detail-row"><span>Inversor</span><span>${gar.inversor || '—'} anos</span></div>
+                    <div class="detail-row"><span>Estrutura</span><span>${gar.estrutura || '—'} anos</span></div>
+                    <div class="detail-row"><span>Instalação</span><span>${gar.instalacao || '—'} anos</span></div>
+                </div>
+                <div class="preco-destaque">Custo: ${formatBRL(k.preco_c)}</div>
             `;
-            
-            const container = document.querySelector('.container-lg');
-            container.insertBefore(alerta, container.firstChild);
-            
-            setTimeout(() => alerta.remove(), 4000);
+            new bootstrap.Modal(document.getElementById('modalDetalheKit')).show();
         }
 
-        // Renderizar na carga inicial
-        // const response = fetch('http://127.0.0.1:5000/get_kits');
-        // const kitslist = response.json();   
-        // console.log("debug kitslist", response);
-        fetch('http://127.0.0.1:5000/get_kits')
-            .then(res => res.json())
-            .then(data => {
-                console.log("debug kits carregados", data);
-                // console.log("debug kits carregados", kits);
-                renderizarKits(data);
-            })
-            .catch(erro => {
-                mostrarAlerta('Erro ao carregar kits: ' + erro.message, 'danger');
-                console.error('Erro:', erro);
-            })
-        
-        
+        // ── Filtro de busca ────────────────────────────────────────
+        document.getElementById('searchKit').addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            const filtrados = kitsGlobal.filter(k => {
+                const mod = k.modulos_json  || {};
+                const inv = k.inversor_json || {};
+                return k.nome.toLowerCase().includes(q)
+                    || (mod.marca  || '').toLowerCase().includes(q)
+                    || (mod.modelo || '').toLowerCase().includes(q)
+                    || (inv.marca  || '').toLowerCase().includes(q)
+                    || (inv.modelo || '').toLowerCase().includes(q);
+            });
+            renderizarKits(filtrados);
+        });
+
+        // ── Init ───────────────────────────────────────────────────
+        carregarKits();
     </script>
     <script src="{{ url_for('static', filename='templats.js') }}"></script>
 </body>

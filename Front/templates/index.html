@@ -10,31 +10,12 @@
 </head>
 <body data-bs-theme=darkk>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg shadow-sm sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-lightning-fill"></i> Happy Energy
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/configurações"><i class="bi bi-box"></i> Configurações</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#Kits-container"><i class="bi bi-box"></i> Kits</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#Leads-container"><i class="bi bi-people"></i> Leads</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#Propostas-container"><i class="bi bi-file-earmark-text"></i> Propostas</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+    <nav class="navbar">
+        {{url_for('index')}};
+        {{url_for('configuracoes')}};
+        {{url_for('kits')}};
+        {{url_for('leads')}}    
+        {{url_for('propostas')}};
     </nav>
 
     <main class="container-fluid px-4 px-lg-5">

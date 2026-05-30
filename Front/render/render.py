@@ -234,7 +234,7 @@ def render_proposta_p6(dados: dict, documento):
         # Linha 0: Cabeçalho
         ['ITEM', 'QUANTIDADE', 'IMAGEM'],
         # Linha 1: Dados principais do Kit
-        [f"KIT {dados.get('potencia_kit', '--.--')} kwp WEG LAJE", "1", img_inversor],
+        [f"KIT {dados.get('potencia_kit', '--.--')} kwp {dados.get('inversor',{'marca',''}.get('marca',''))} LAJE", "1", img_inversor],
         # Linhas 2: Reservada para a descrição longa expandida (via SPAN)
         [dados.get('descricao', ''), '', '']
     ]

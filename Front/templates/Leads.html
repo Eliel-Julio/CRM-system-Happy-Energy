@@ -8,35 +8,87 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Gerenciar Leads - Happy Energy</title>
     <style>
+        .btn-form-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .lead-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+        }
+        .lead-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 6px rgba(46, 204, 113, 0.15);
+        }
+        .lead-info h5 {
+            margin: 0 0 0.3rem 0;
+            color: #212529;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .lead-info p {
+            margin: 0.2rem 0;
+            color: #6c757d;
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+        .lead-info p strong { color: #495057; }
+        .lead-actions {
+            display: flex;
+            gap: 0.35rem;
+            flex-shrink: 0;
+            margin-left: 1rem;
+        }
+        .lead-actions .btn {
+            padding: 0.35rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        /* Modal */
+        .modal-lead .modal-header { background: var(--primary-color); color: white; }
+        .modal-lead .modal-title  { font-weight: 700; }
+        .modal-lead .detail-section { margin-bottom: 1rem; }
+        .modal-lead .detail-section h6 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6c757d;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.25rem;
+            margin-bottom: 0.4rem;
+        }
+        .modal-lead .detail-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            padding: 0.2rem 0;
+        }
+        .modal-lead .detail-row span:first-child { color: #6c757d; }
+        .modal-lead .detail-row span:last-child  { font-weight: 600; color: #212529; }
+
+        /* Formulário de edição inline no modal */
+        #formEditarLead { display: none; }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-lightning-fill"></i> Happy Energy
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/kits"><i class="bi bi-box"></i> Kits</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-people"></i> Leads</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/propostas"><i class="bi bi-file-earmark-text"></i> Propostas</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+    <nav class="navbar">
+        {{url_for('index')}};
+        {{url_for('configuracoes')}};
+        {{url_for('kits')}};
+        {{url_for('leads')}};
+        {{url_for('propostas')}};
     </nav>
 
-    <!-- Hero Section -->
     <main class="container-fluid px-4 px-lg-5">
         <div class="hero-section">
             <div class="container">
@@ -46,42 +98,57 @@
         </div>
 
         <div class="container-lg">
-            <!-- Form Section: Adicionar Novo lead -->
+
+            <!-- ── Formulário Novo Lead ────────────────────────────── -->
             <div class="form-section">
-                <h3><i class="bi bi-plus-circle"></i> Novo lead</h3>
+                <h3><i class="bi bi-plus-circle"></i> Novo Lead</h3>
                 <form id="formNovoLead">
                     <div class="form-grid-compact">
-                        <!-- Row 1: Informações Básicas -->
-                        <!-- nome = Column(String, nullable=False) -->
+
+                        <!-- nome -->
                         <div class="form-group-compact">
-                            <label for="Nome-completo" class="form-label">Nome completo*</label>
-                            <input type="text" class="form-control" id="Nome-completo" placeholder="Nome do cliente" required>
+                            <label for="nome" class="form-label">Nome completo *</label>
+                            <input type="text" class="form-control" id="nome" placeholder="Ex: João da Silva" required>
                         </div>
-                        <!-- cpf = Column(String, nullable=False, unique=True) -->
+
+                        <!-- cpf -->
                         <div class="form-group-compact">
                             <label for="cpf" class="form-label">CPF *</label>
-                            <input type="text" inputmode="numeric" class="form-control" id="cpf" step="1" maxlength="14">
+                            <input type="text" class="form-control" id="cpf"
+                                   inputmode="numeric" maxlength="14"
+                                   placeholder="000.000.000-00" required>
                         </div>
-                        <!-- email = Column(String, nullable=False) -->
+
+                        <!-- email -->
                         <div class="form-group-compact">
-                            <label for="email" class="form-label">Email *</label>
-                            <input type="email" inputmode="email" class="form-control" id="email">
+                            <label for="email" class="form-label">E-mail *</label>
+                            <input type="email" class="form-control" id="email"
+                                   inputmode="email" placeholder="joao@email.com" required>
                         </div>
-                        <!-- telefone = Column(String, nullable=False) -->
+
+                        <!-- telefone -->
                         <div class="form-group-compact">
                             <label for="telefone" class="form-label">Telefone *</label>
-                            <input type="text" inputmode="tel" class="form-control" id="telefone" placeholder="(00) 00000-0000">
+                            <input type="text" class="form-control" id="telefone"
+                                   inputmode="tel" maxlength="15"
+                                   placeholder="(00) 00000-0000" required>
                         </div>
-                        <!-- cidade_UF = Column(String, nullable=False) -->
+
+                        <!-- cidade_uf -->
                         <div class="form-group-compact">
-                            <label for="cidade-UF" class="form-label">Cidade-UF *</label>
-                            <input type="text" class="form-control" id="cidade-UF" placeholder="Cidade, UF" required>
+                            <label for="cidade_uf" class="form-label">Cidade / UF *</label>
+                            <input type="text" class="form-control" id="cidade_uf"
+                                   placeholder="Ex: Petrolina, PE" required>
                         </div>
+
+                        <!-- endereco -->
                         <div class="form-group-compact form-grid-full">
-                            <label for="descricaoLead" class="form-label">Descrição</label>
-                            <textarea class="form-control" id="descricaoLead" rows="2" placeholder="Detalhes adicionais..."></textarea>
+                            <label for="endereco" class="form-label">Endereço</label>
+                            <input type="text" class="form-control" id="endereco"
+                                   placeholder="Rua, número, bairro...">
                         </div>
-                    </div>
+
+                    </div><!-- /form-grid-compact -->
 
                     <div class="btn-form-group">
                         <button type="submit" class="btn btn-primary btn-sm">
@@ -92,35 +159,100 @@
                         </button>
                     </div>
                 </form>
-            </div>
+            </div><!-- /form-section -->
 
-            <!-- Leads List Section -->
+            <!-- ── Listagem de Leads ───────────────────────────────── -->
             <div class="section-card">
                 <div class="card-header">
                     <h2><i class="bi bi-list-ul"></i> Listagem de Leads</h2>
                 </div>
                 <div class="card-body">
-                    <!-- Filter and Search -->
                     <div class="row g-2 mb-2">
-                        <div class="col-md-6">
-                            <input type="text" class="form-control form-control-sm" id="searchLead" placeholder="Buscar por nome...">
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm"
+                                   id="searchLead" placeholder="Buscar por nome, CPF ou cidade...">
                         </div>
-                        <div class="col-md-6">
-                            <select class="form-select form-select-sm" id="filterCategoria">
-                                <option value="">Todas as categorias</option>
-                                <option value="solar">Solar</option>
-                                <option value="eolica">Eólica</option>
-                                <option value="hibrido">Híbrido</option>
-                                <option value="baterias">Baterias</option>
-                                <option value="outro">Outro</option>
-                            </select>
+                        <div class="col-md-4 text-end">
+                            <span class="text-muted small" id="totalLeads"></span>
                         </div>
                     </div>
                     <div id="leadsContainer"></div>
                 </div>
             </div>
-        </div>
+
+        </div><!-- /container-lg -->
     </main>
+
+    <!-- ── Modal Detalhes / Edição ──────────────────────────────────── -->
+    <div class="modal fade modal-lead" id="modalDetalheLead" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person me-2"></i>Detalhes do Lead</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+                    <!-- Visualização -->
+                    <div id="viewLead">
+                        <div class="detail-section">
+                            <h6><i class="bi bi-person me-1"></i>Dados Pessoais</h6>
+                            <div class="detail-row"><span>Nome</span><span id="v_nome"></span></div>
+                            <div class="detail-row"><span>CPF</span><span id="v_cpf"></span></div>
+                        </div>
+                        <div class="detail-section">
+                            <h6><i class="bi bi-envelope me-1"></i>Contato</h6>
+                            <div class="detail-row"><span>E-mail</span><span id="v_email"></span></div>
+                            <div class="detail-row"><span>Telefone</span><span id="v_telefone"></span></div>
+                        </div>
+                        <div class="detail-section">
+                            <h6><i class="bi bi-geo-alt me-1"></i>Localização</h6>
+                            <div class="detail-row"><span>Cidade / UF</span><span id="v_cidade_uf"></span></div>
+                            <div class="detail-row"><span>Endereço</span><span id="v_endereco"></span></div>
+                        </div>
+                    </div>
+
+                    <!-- Formulário de edição (oculto por padrão) -->
+                    <form id="formEditarLead">
+                        <input type="hidden" id="edit_id">
+                        <div class="mb-2">
+                            <label class="form-label">Nome *</label>
+                            <input type="text" class="form-control form-control-sm" id="edit_nome" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">CPF *</label>
+                            <input type="text" class="form-control form-control-sm" id="edit_cpf"
+                                   inputmode="numeric" maxlength="14" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">E-mail *</label>
+                            <input type="email" class="form-control form-control-sm" id="edit_email" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Telefone *</label>
+                            <input type="text" class="form-control form-control-sm" id="edit_telefone"
+                                   inputmode="tel" maxlength="15" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Cidade / UF *</label>
+                            <input type="text" class="form-control form-control-sm" id="edit_cidade_uf" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Endereço</label>
+                            <input type="text" class="form-control form-control-sm" id="edit_endereco">
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer" id="modalFooterLead">
+                    <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+                    <button class="btn btn-warning btn-sm" id="btnModoEditar">
+                        <i class="bi bi-pencil"></i> Editar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer>
@@ -131,183 +263,226 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script>
-        // Gerenciamento de Leads
-        let leads = [];
+        const BASE = 'http://127.0.0.1:5000';
+        let leadsGlobal = [];
 
-        const formNovoLead = document.getElementById('formNovoLead');
-        const leadsContainer = document.getElementById('leadsContainer');
-        const searchLead = document.getElementById('searchLead');
-        const filterCategoria = document.getElementById('filterCategoria');
+        // ── Máscaras simples ───────────────────────────────────────
+        function mascaraCPF(v) {
+            return v.replace(/\D/g,'')
+                    .replace(/(\d{3})(\d)/,'$1.$2')
+                    .replace(/(\d{3})(\d)/,'$1.$2')
+                    .replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+        }
+        function mascaraTel(v) {
+            return v.replace(/\D/g,'')
+                    .replace(/^(\d{2})(\d)/,'($1) $2')
+                    .replace(/(\d{5})(\d{1,4})$/,'$1-$2');
+        }
+        ['cpf','edit_cpf'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function(){
+                this.value = mascaraCPF(this.value);
+            });
+        });
+        ['telefone','edit_telefone'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function(){
+                this.value = mascaraTel(this.value);
+            });
+        });
 
-        // Adicionar novo lead
-        formNovoLead.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const novoLead = {
-                nome: document.getElementById('Nome-completo').value,
-                cpf: document.getElementById('cpf').value,
-                email: document.getElementById('email').value,
-                telefone: document.getElementById('telefone').value,
-                cidade_UF: document.getElementById('cidade-UF').value
-            };
-            try {
-                const response = await fetch('http://127.0.0.1:5000/novo_lead', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(novoLead)
-                });
+        // ── Utilitários ────────────────────────────────────────────
+        function mostrarAlerta(mensagem, tipo = 'info') {
+            const el = document.createElement('div');
+            el.className = `alert alert-${tipo} alert-dismissible fade show`;
+            el.role = 'alert';
+            el.innerHTML = `${mensagem}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            document.querySelector('.container-lg').insertBefore(el, document.querySelector('.container-lg').firstChild);
+            setTimeout(() => el.remove(), 4000);
+        }
 
-                const resultado = await response.json();
-
-                if (response.ok) {
-                    novoLead.id = Date.now();
-                    leads.push(novoLead);
-                    formNovoLead.reset();
-                    renderizarLeads();
-                    mostrarAlerta('Lead adicionado com sucesso na base de dados!', 'success');
-                } else {
-                    mostrarAlerta('Erro: ' + resultado.error, 'danger');
-                }
-            } catch (erro) {
-                mostrarAlerta('Erro ao enviar dados: ' + erro.message, 'danger');
-                console.error('Erro:', erro);
-            }
-            fetch('http://127.0.0.1:5000/get_leads')
-                .then(res => res.json())
+        // ── Carregar leads ─────────────────────────────────────────
+        function carregarLeads() {
+            fetch(`${BASE}/get_leads`)
+                .then(r => r.json())
                 .then(data => {
-                    console.log("debug leads carregados", data);
-                    // console.log("debug leads carregados", leads);
+                    leadsGlobal = data;
                     renderizarLeads(data);
                 })
-                .catch(erro => {
-                    mostrarAlerta('Erro ao carregar leads: ' + erro.message, 'danger');
-                    console.error('Erro:', erro);
-                })
-        });
-                
+                .catch(e => mostrarAlerta('Erro ao carregar leads: ' + e.message, 'danger'));
+        }
 
-        // Renderizar leads
-        function renderizarLeads(leadsParaRenderizar) {
-            if (leadsParaRenderizar.length === 0) {
-                console.log("debug", "Nenhum lead para renderizar");
-                leadsContainer.innerHTML = `
+        // ── Renderizar leads ───────────────────────────────────────
+        function renderizarLeads(lista) {
+            const container = document.getElementById('leadsContainer');
+            document.getElementById('totalLeads').textContent =
+                lista.length === 1 ? '1 lead' : `${lista.length} leads`;
+
+            if (lista.length === 0) {
+                container.innerHTML = `
                     <div class="empty-state">
                         <i class="bi bi-inbox"></i>
                         <h5>Nenhum lead cadastrado</h5>
                         <p>Adicione seu primeiro lead usando o formulário acima</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
-            console.log("debug--", leadsParaRenderizar.length);
-            leadsContainer.innerHTML = leadsParaRenderizar.map(lead => `
+
+            container.innerHTML = lista.map(l => `
                 <div class="lead-item">
                     <div class="lead-info">
-                        <h5>${lead.nome}</h5>
-                        <p><strong>Email:</strong> ${lead.email}</p>
-                        <p><strong>Telefone:</strong> ${lead.telefone}</p>
-                        <p><strong>Cidade/UF:</strong> ${lead.cidade_UF}</p>
+                        <h5><i class="bi bi-person-fill me-1 text-muted"></i>${l.nome}</h5>
+                        <p>
+                            <strong>CPF:</strong> ${l.cpf || '—'}
+                            &nbsp;|&nbsp;<strong>Telefone:</strong> ${l.telefone || '—'}
+                        </p>
+                        <p>
+                            <strong>E-mail:</strong> ${l.email || '—'}
+                            &nbsp;|&nbsp;<strong>Cidade/UF:</strong> ${l.cidade_uf || '—'}
+                        </p>
+                        ${l.endereco ? `<p><strong>Endereço:</strong> ${l.endereco}</p>` : ''}
                     </div>
                     <div class="lead-actions">
-                        <button class="btn btn-sm btn-outline-primary" onclick="editarLead(${lead.id})" title="Editar">
-                            <i class="bi bi-pencil"></i>
+                        <button class="btn btn-sm btn-outline-info" onclick="verDetalhes(${l.id})" title="Detalhes">
+                            <i class="bi bi-eye"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deletarLead(${lead.id})" title="Deletar">
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletarLead(${l.id})" title="Deletar">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
                 </div>
             `).join('');
-            
-        }
-        function deletarLead(leadId){
-            console.log("teste delet")
-            fetch("http://127.0.0.1:5000/deletar_lead/" + leadId, {
-                method: "DELETE"
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    mostrarAlerta(data.message, 'success');
-                    fetch('http://127.0.0.1:5000/get_leads')
-                        .then(res => res.json())
-                        .then(data => {
-                            renderizarLeads(data);
-                        });
-                } else {
-                    mostrarAlerta('Erro: ' + data.error, 'danger');
-                }
-            })
-            .catch(erro => {
-                mostrarAlerta('Erro ao deletar lead: ' + erro.message, 'danger');
-                console.error('Erro:', erro);
-            });
         }
 
-        function editarLead(leadId){
-            fetch("http://127.0.0.1:5000/editar_lead/" + leadId, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    // Adicione os dados do lead aqui
+        // ── Adicionar novo lead ────────────────────────────────────
+        document.getElementById('formNovoLead').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                nome:       document.getElementById('nome').value,
+                cpf:        document.getElementById('cpf').value,
+                email:      document.getElementById('email').value,
+                telefone:   document.getElementById('telefone').value,
+                cidade_uf:  document.getElementById('cidade_uf').value,
+                endereco:   document.getElementById('endereco').value,
+            };
+
+            try {
+                const res = await fetch(`${BASE}/novo_lead`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const resultado = await res.json();
+                if (res.ok) {
+                    document.getElementById('formNovoLead').reset();
+                    mostrarAlerta('Lead adicionado com sucesso!', 'success');
+                    carregarLeads();
+                } else {
+                    mostrarAlerta('Erro: ' + (resultado.error || 'Falha ao criar lead'), 'danger');
+                }
+            } catch (err) {
+                mostrarAlerta('Erro ao enviar dados: ' + err.message, 'danger');
+            }
+        });
+
+        // ── Deletar lead ───────────────────────────────────────────
+        function deletarLead(id) {
+            if (!confirm('Deseja realmente excluir este lead?')) return;
+            fetch(`${BASE}/deletar_lead/${id}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarAlerta(data.message, 'success');
+                        carregarLeads();
+                    } else {
+                        mostrarAlerta('Erro: ' + data.error, 'danger');
+                    }
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
+                .catch(e => mostrarAlerta('Erro ao deletar: ' + e.message, 'danger'));
+        }
+
+        // ── Modal detalhes ─────────────────────────────────────────
+        function verDetalhes(id) {
+            const l = leadsGlobal.find(x => x.id === id);
+            if (!l) return;
+
+            // preenche campos de visualização
+            document.getElementById('v_nome').textContent     = l.nome      || '—';
+            document.getElementById('v_cpf').textContent      = l.cpf       || '—';
+            document.getElementById('v_email').textContent    = l.email     || '—';
+            document.getElementById('v_telefone').textContent = l.telefone  || '—';
+            document.getElementById('v_cidade_uf').textContent= l.cidade_uf || '—';
+            document.getElementById('v_endereco').textContent = l.endereco  || '—';
+
+            // preenche campos de edição
+            document.getElementById('edit_id').value         = l.id;
+            document.getElementById('edit_nome').value       = l.nome      || '';
+            document.getElementById('edit_cpf').value        = l.cpf       || '';
+            document.getElementById('edit_email').value      = l.email     || '';
+            document.getElementById('edit_telefone').value   = l.telefone  || '';
+            document.getElementById('edit_cidade_uf').value  = l.cidade_uf || '';
+            document.getElementById('edit_endereco').value   = l.endereco  || '';
+
+            // garante modo visualização ao abrir
+            modoVisualizar();
+            new bootstrap.Modal(document.getElementById('modalDetalheLead')).show();
+        }
+
+        function modoVisualizar() {
+            document.getElementById('viewLead').style.display       = '';
+            document.getElementById('formEditarLead').style.display = 'none';
+            document.getElementById('btnModoEditar').innerHTML      = '<i class="bi bi-pencil"></i> Editar';
+            document.getElementById('btnModoEditar').onclick        = modoEditar;
+        }
+        function modoEditar() {
+            document.getElementById('viewLead').style.display       = 'none';
+            document.getElementById('formEditarLead').style.display = '';
+            document.getElementById('btnModoEditar').innerHTML      = '<i class="bi bi-check-lg"></i> Salvar';
+            document.getElementById('btnModoEditar').onclick        = salvarEdicao;
+        }
+
+        async function salvarEdicao() {
+            const id = document.getElementById('edit_id').value;
+            const payload = {
+                nome:      document.getElementById('edit_nome').value,
+                cpf:       document.getElementById('edit_cpf').value,
+                email:     document.getElementById('edit_email').value,
+                telefone:  document.getElementById('edit_telefone').value,
+                cidade_uf: document.getElementById('edit_cidade_uf').value,
+                endereco:  document.getElementById('edit_endereco').value,
+            };
+            try {
+                const res = await fetch(`${BASE}/editar_lead/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
                 if (data.success) {
-                    mostrarAlerta(data.message, 'success');
-                    fetch('http://127.0.0.1:5000/get_leads')
-                        .then(res => res.json())
-                        .then(data => {
-                            renderizarLeads(data);
-                        });
+                    bootstrap.Modal.getInstance(document.getElementById('modalDetalheLead')).hide();
+                    mostrarAlerta('Lead atualizado com sucesso!', 'success');
+                    carregarLeads();
                 } else {
                     mostrarAlerta('Erro: ' + data.error, 'danger');
                 }
-            })
-            .catch(erro => {
-                mostrarAlerta('Erro ao editar lead: ' + erro.message, 'danger');
-                console.error('Erro:', erro);
-            });
+            } catch (err) {
+                mostrarAlerta('Erro ao salvar: ' + err.message, 'danger');
+            }
         }
 
-        // Buscar e filtrar
-        
-        
+        // ── Filtro de busca ────────────────────────────────────────
+        document.getElementById('searchLead').addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            const filtrados = leadsGlobal.filter(l =>
+                (l.nome      || '').toLowerCase().includes(q) ||
+                (l.cpf       || '').toLowerCase().includes(q) ||
+                (l.cidade_uf || '').toLowerCase().includes(q) ||
+                (l.email     || '').toLowerCase().includes(q)
+            );
+            renderizarLeads(filtrados);
+        });
 
-        // Mostrar alerta
-        function mostrarAlerta(mensagem, tipo = 'info') {
-            const alerta = document.createElement('div');
-            alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
-            alerta.role = 'alert';
-            alerta.innerHTML = `
-                ${mensagem}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            const container = document.querySelector('.container-lg');
-            container.insertBefore(alerta, container.firstChild);
-            
-            setTimeout(() => alerta.remove(), 40000);
-        }
-
-        // Renderizar na carga inicial
-        fetch('http://127.0.0.1:5000/get_leads')
-            .then(res => res.json())
-            .then(data => {
-                console.log("debug leads carregados", data);
-                // console.log("debug leads carregados", leads);
-                renderizarLeads(data);
-            })
-            .catch(erro => {
-                mostrarAlerta('Erro ao carregar Leads: ' + erro.message, 'danger');
-                console.error('Erro:', erro);
-            })
-        
-       
+        // ── Init ───────────────────────────────────────────────────
+        carregarLeads();
     </script>
     <script src="{{ url_for('static', filename='templats.js') }}"></script>
 </body>
