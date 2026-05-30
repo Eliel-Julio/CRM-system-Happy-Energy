@@ -24,6 +24,11 @@ sheet_padding_top = 20
 sheet_padding_left = 1*CM
 font_size = 12
 
+def get_pay_back(finace_data):
+    meses = 15
+    anos , meses_restantes = meses//12 , meses%12
+    return f"{anos} ano{'s' if anos!= 1 else ''} e {meses_restantes} mese{'s' if meses_restantes!= 1 else ''}"
+
 def tousand_separator(value):
     return f'{value:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
 
@@ -149,8 +154,8 @@ def render_proposta_p5(dados: dict, documento):
     documento.drawImage(file_route("comparativo.png"), sheet_padding_left, y, width=15.5*CM, height=1.69*CM)
 
     meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-    consumo = [dados.get('CONSUMO_MES_INICIAL', 800)]*12
-    geracao = [v*dados.get('potencia_kit', 7.32)*139/6.38 for v in [6.38,6.16,6.03,5.24,4.83,4.58,4.82,5.55,6.32,6.4,6.5,6.38]]
+    consumo = [0.8*dados.get('potencia_kit',7.32)*dados.get('CONSTS',{'CONST_IRRAD':139}).get('CONST_IRRAD',139)]*12
+    geracao = [v*dados.get('potencia_kit', 7.32)*dados.get('CONSTS',{'CONST_IRRAD':139}).get('CONST_IRRAD',139)/6.38 for v in [6.38,6.16,6.03,5.24,4.83,4.58,4.82,5.55,6.32,6.4,6.5,6.38]]
     
     largura_desenho = 17.09 * CM
     altura_desenho = 8.0 * CM
@@ -566,7 +571,7 @@ def render_proposta_p7(dados: dict, documento):
         ('PRAZO DE INSTALAÇÃO: ', f"{dados.get('prazo_instalacao', '0')} Dias"),
         ('FORMA DE PAGAMENTO: ', dados.get('forma_pagamento', 'N/A')),
         ('CONDIÇÃO DE PAGAMENTO: ', dados.get('condicao_pagamento', 'N/A')),
-        ('RETORNO DO INVESTIMENTO: ', dados.get('retorno_investimento', 'N/A'))
+        ('RETORNO DO INVESTIMENTO: ', get_pay_back(''))
     ]
 
     for rotulo, valor in dados_investimento:
@@ -863,7 +868,6 @@ if __name__ == "__main__":
     "prazo_instalacao": 60,
     "forma_pagamento": "Financiamento Solfacil",
     "condicao_pagamento": "Entrada de 30% e o restante em 12x sem juros",
-    "retorno_investimento": "1 ano e 3 meses",
     "modulos": {"potencia": 610, "marca": "WEG", "modelo": "615 Wp - WEG BIFACIAL", "quantidade": 12, "area": 2.39*1.14},
     "inversor":{"potencia": 5.0, "marca": "WEG", "modelo": "SIW 200G M050 W00"    , "quantidade": 1, "tipo": "Monofásico"},
     "estrutura": {"tipo": "Fibrocimento", "marca": "WEG", "quantidade": 12},

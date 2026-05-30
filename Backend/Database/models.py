@@ -87,6 +87,7 @@ class kit(base):
         self.inversor_json = inversor
         self.estrutura_json = estrutura
         self.garantias_json = garantias
+
         self.nome = nome
         self.descricao = descricao
         self.preco_c = preco_c
@@ -123,7 +124,12 @@ class proposta(base):
     cliente_rel = relationship("cliente")
     kit_rel = relationship("kit")
 
-    def __init__(self, cliente_id, kit_id):
+    prazoprazo_instalacao = Column(Integer,nullable=False)
+    consdicao_pgto = Column(String,nullable=False)
+    validade_proposta = Column(Integer,nullable=False)
+    forma_pgto = Column(String,nullable=False)
+
+    def __init__(self, cliente_id, kit_id,prazo_instalacao:int=60, consdicao_pgto:str='', validade_proposta:int=30,forma_pgto:str=''):
         self.cliente_id = cliente_id
         
         self.kit_id = kit_id
@@ -135,6 +141,11 @@ class proposta(base):
         self.consts = {obj.nome:obj.valor for obj in session.query(propriedade).all()}
         self.valor_total = self.Def_valor_total()
         self.data = dt.today().strftime("%d/%m/%Y")
+
+        self.prazoprazo_instalacao = prazo_instalacao
+        self.consdicao_pgto = consdicao_pgto
+        self.validade_proposta = validade_proposta
+        self.forma_pgto = forma_pgto
 
     def Def_valor_total(self,instal=60, extra=350 , rates={"margim":0.3,"tax":0.07, "commission":0.00}):return (self.kit_json["preco_c"] + (self.kit_json["n_modulos"] * instal) + extra)*produto([1+t for t in rates.values()])
 

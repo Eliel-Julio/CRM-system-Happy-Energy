@@ -9,11 +9,8 @@
         "MANUTENCAO_INFLACAO_ANUAL": 0.03
     },
     
-    "garantias": {"painel": "10 anos", "inversor": "10 anos", "estrutura": "10 anos", "instalacao": "1 ano"},
     "prazo_instalacao": 60,
     "condicao_pagamento": "Entrada de 30% e o restante em 12x sem juros",
     "validade_proposta": "30 dias"
     "forma_pagamento": "Financiamento Solfacil",
-    "CONSUMO_MES_INICIAL": 800,
-    "retorno_investimento": "1 ano e 3 meses",
     
