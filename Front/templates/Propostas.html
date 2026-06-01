@@ -342,10 +342,16 @@
                         <button class="btn btn-sm btn-outline-danger" onclick="deletarProposta(${p.id})" title="Deletar">
                             <i class="bi bi-trash"></i>
                         </button>
+                        <a class="btn btn-sm btn-outline-primary" href="${BASE}/download_orcamento/${p.id}" download title="Download PDF">
+                            <i class="bi bi-download"></i>
+                        </a>
                     </div>
                 </div>
             `).join('');
         }
+
+        // ── Baixar proposta (download) ──────────────────────────────
+        // O download é feito diretamente pelo atributo href/download do elemento <a>
 
         // ── Adicionar nova proposta ────────────────────────────────────
         document.getElementById('formNovaProposta').addEventListener('submit', async (e) => {

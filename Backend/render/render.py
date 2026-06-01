@@ -1,4 +1,5 @@
 import os
+import io
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4 #(595.2755905511812, 841.8897637795277)
 from reportlab.pdfbase import pdfmetrics
@@ -30,7 +31,7 @@ def get_pay_back(finace_data):
     return f"{anos} ano{'s' if anos!= 1 else ''} e {meses_restantes} mese{'s' if meses_restantes!= 1 else ''}"
 
 def tousand_separator(value):
-    return f'{value:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
+    return f'{float(value):,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
 
 def file_route(filename: str, src_path: str='render/src/imagens'):
     if not filename:
@@ -234,7 +235,7 @@ def render_proposta_p6(dados: dict, documento):
         # Linha 0: Cabeçalho
         ['ITEM', 'QUANTIDADE', 'IMAGEM'],
         # Linha 1: Dados principais do Kit
-        [f"KIT {dados.get('potencia_kit', '--.--')} kwp {dados.get('inversor',{'marca',''}.get('marca',''))} LAJE", "1", img_inversor],
+        [f"KIT {dados.get('potencia_kit', '--.--')} kwp {dados.get('inversor',{'marca':''}.get('marca',''))} LAJE", "1", img_inversor],
         # Linhas 2: Reservada para a descrição longa expandida (via SPAN)
         [dados.get('descricao', ''), '', '']
     ]
@@ -827,9 +828,12 @@ def render_proposta_p10(dados: dict, documento):
     return documento
 
 def render_proposta(dados: dict):
-    if not dados:raise ValueError("Dados não pode ser vazio")
+    """Gera o PDF em memória e retorna um BytesIO pronto para leitura."""
+    if not dados:
+        raise ValueError("Dados não pode ser vazio")
 
-    documento = canvas.Canvas(f"proposta_{dados['id']}.pdf", pagesize=A4)
+    buffer = io.BytesIO()
+    documento = canvas.Canvas(buffer, pagesize=A4)
     documento = render_proposta_p1(dados, documento)
     documento = render_proposta_p2(dados, documento)
     documento = render_proposta_p3(dados, documento)
@@ -840,7 +844,9 @@ def render_proposta(dados: dict):
     documento = render_proposta_p8(dados, documento)
     documento = render_proposta_p9(dados, documento)
     documento = render_proposta_p10(dados, documento)
-    return documento
+    documento.save()   # grava tudo no buffer
+    buffer.seek(0)     # volta ao início para o Flask ler
+    return buffer
 if __name__ == "__main__":
     dados={
     "id": 1,
