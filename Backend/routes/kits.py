@@ -12,9 +12,12 @@ def get_kits():
         'nome': kit.nome,
         'descricao': kit.descricao,
         'preco_c': kit.preco_c,
-        'n_modulos': kit.n_modulos,
-        'p_modulos': kit.p_modulos,
-        'inversor': kit.inversor
+
+        "modulo_json":kit.modulos_json,
+        "inversor_json":kit.inversor_json ,
+        "estrutura_json":kit.estrutura_json,
+        "garantias_json":kit.garantias_json,
+
     } for kit in kits])
 
 @app.route('/novo_kit', methods=['POST'])
@@ -25,13 +28,16 @@ def novo_kit():
         return jsonify({'error': 'Dados do kit não fornecidos'}), 400
     print('-----------debug1-----------')
     try:
+        print(dados.get('modulos'))
         kit_obj = kit(
             nome=dados.get('nome'),
-            descricao=dados.get('descricao'),
+            descricao=dados.get('descricao',""),
             preco_c=dados.get('precoVenda', 0.0),
-            n_modulos=dados.get('numModulos', 0),
-            inversor=True,
-            p_modulos=dados.get('potencia', 0.0)
+
+            modulos = dados.get("modulos",""),
+            inversor = dados.get("inversor","") ,
+            estrutura = dados.get("estrutura",""),
+            garantias = dados.get("garantias",""),
         )
     
         session.add(kit_obj)
@@ -39,7 +45,6 @@ def novo_kit():
 
         return jsonify({'success': True, 'message': f"Kit {kit_obj.nome} adicionado com sucesso!"}), 201
     except Exception as e:
-        print('-----------debug3.2-----------')
         return jsonify({'error': str(e)}), 500
     
 @app.route('/editar_kit/<int:kit_id>', methods=['PUT'])

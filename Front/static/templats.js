@@ -51,9 +51,9 @@ function loadtheme(){
     fetch('/get_configs')
     .then(res => res.json())
     .then(data =>{
-        console.log("debug configs carregados", data);
+        console.log("configs carregados", data);
         const theme = data.user.theme || 'light'
-        console.log("debug theme carregado", theme);
+        console.log("theme carregado", theme);
         document.documentElement.setAttribute('data-bs-theme', theme)
     })
 }

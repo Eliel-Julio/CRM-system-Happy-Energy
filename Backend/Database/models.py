@@ -76,9 +76,9 @@ class kit(base):
 
     def __init__(self, nome, descricao, preco_c, modulos:dict, inversor:dict, estrutura:dict, garantias:dict):
         for key in ("potencia", "marca", "modelo", "quantidade", "tipo"):
-            if key not in modulos.keys():raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário inversor!")
-        for key in ("potencia","marca", "modelo", "quantidade","area"):
-            if key not in inversor.keys():raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário modulos!")
+            if key not in modulos.keys():raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário modulos!")
+        for key in ("potencia","marca", "modelo", "quantidade"):
+            if key not in inversor.keys():raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário inversor!")
         for key in ("tipo", "marca", "quantidade"):
             if key not in estrutura.keys():raise KeyError(f"A chave obrigatória '{key}' está faltando no dicionário estrutura!")
         for key in ("painel", "inversor", "estrutura", "instalacao"):
@@ -91,7 +91,6 @@ class kit(base):
         self.nome = nome
         self.descricao = descricao
         self.preco_c = preco_c
-        self.inversor = inversor
 
 class cliente(base):
     __tablename__ = 'clientes'
@@ -117,9 +116,11 @@ class proposta(base):
     cliente_id = Column(Integer, ForeignKey('clientes.id'), nullable=False)
     kit_id = Column(Integer, ForeignKey('kits.id'), nullable=False)
     valor_total = Column(FLOAT, nullable=False)
+    data = Column(String, nullable=False)
 
     kit_json = Column(JSON, nullable=False)
     cliente_json = Column(JSON, nullable=False)
+    consts = Column(JSON, nullable=False)
 
     cliente_rel = relationship("cliente")
     kit_rel = relationship("kit")
@@ -130,8 +131,6 @@ class proposta(base):
     forma_pgto = Column(String,nullable=False)
 
     def __init__(self, cliente_id, kit_id,prazo_instalacao:int=60, consdicao_pgto:str='', validade_proposta:int=30,forma_pgto:str=''):
-        self.cliente_id = cliente_id
-        
         self.kit_id = kit_id
         self.kit_json = self.kit_data(kit_id)
 
@@ -147,7 +146,8 @@ class proposta(base):
         self.validade_proposta = validade_proposta
         self.forma_pgto = forma_pgto
 
-    def Def_valor_total(self,instal=60, extra=350 , rates={"margim":0.3,"tax":0.07, "commission":0.00}):return (self.kit_json["preco_c"] + (self.kit_json["n_modulos"] * instal) + extra)*produto([1+t for t in rates.values()])
+    def Def_valor_total(self,instal=60, extra=350 , rates={"margim":0.3,"tax":0.07, "commission":0.00}):
+        return (self.kit_json["preco_c"] + (self.kit_json["modulos_json"]["quantidade"] * instal) + extra)*produto([1+t for t in rates.values()])
 
     def cliente_data(self, id_):
         cliente_=session.query(cliente).filter_by(id=id_).first()

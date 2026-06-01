@@ -148,6 +148,7 @@
                         <div class="form-group-compact">
                             <label for="formaPgto" class="form-label">Forma de Pagamento</label>
                             <select class="form-select" id="formaPgto">
+                                <option value="">Não informar</option>
                                 <option value="À vista">À vista</option>
                                 <option value="Financiamento">Financiamento</option>
                                 <option value="Parcelado">Parcelado no cartão</option>
@@ -262,7 +263,7 @@
         async function carregarSelects() {
             try {
                 const [resClientes, resKits] = await Promise.all([
-                    fetch(`${BASE}/get_clientes`),
+                    fetch(`${BASE}/get_leads`),
                     fetch(`${BASE}/get_kits`)
                 ]);
                 const clientes = await resClientes.json();
@@ -280,7 +281,7 @@
                 kits.forEach(k => {
                     const opt = document.createElement('option');
                     opt.value = k.id;
-                    opt.textContent = `${k.nome} (${k.p_modulos} W)`;
+                    opt.textContent = `${k.nome} (${k.modulo_json.quantidade} W)`;
                     selKit.appendChild(opt);
                 });
             } catch (e) {
@@ -290,7 +291,7 @@
 
         // ── Carregar e renderizar propostas ───────────────────────────
         function carregarPropostas() {
-            fetch(`${BASE}/get_propostas`)
+            fetch(`${BASE}/get_orcamentos`)
                 .then(r => r.json())
                 .then(data => {
                     propostasGlobal = data;
@@ -341,9 +342,21 @@
                         <button class="btn btn-sm btn-outline-danger" onclick="deletarProposta(${p.id})" title="Deletar">
                             <i class="bi bi-trash"></i>
                         </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="baixarProposta(${p.id})" title="Download">
+                            <i class="bi bi-download"></i>
+                        </button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        // ── Baixar proposta (download) ──────────────────────────────
+        function baixarProposta(id) {
+            try {
+                window.open(`${BASE}/download_orcamento/${id}`, '_blank');
+            } catch (e) {
+                mostrarAlerta('Erro ao iniciar download: ' + e.message, 'danger');
+            }
         }
 
         // ── Adicionar nova proposta ────────────────────────────────────
@@ -360,7 +373,7 @@
             };
 
             try {
-                const res = await fetch(`${BASE}/nova_proposta`, {
+                const res = await fetch(`${BASE}/novo_orcamento`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
