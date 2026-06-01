@@ -342,21 +342,9 @@
                         <button class="btn btn-sm btn-outline-danger" onclick="deletarProposta(${p.id})" title="Deletar">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-primary" onclick="baixarProposta(${p.id})" title="Download">
-                            <i class="bi bi-download"></i>
-                        </button>
                     </div>
                 </div>
             `).join('');
-        }
-
-        // ── Baixar proposta (download) ──────────────────────────────
-        function baixarProposta(id) {
-            try {
-                window.open(`${BASE}/download_orcamento/${id}`, '_blank');
-            } catch (e) {
-                mostrarAlerta('Erro ao iniciar download: ' + e.message, 'danger');
-            }
         }
 
         // ── Adicionar nova proposta ────────────────────────────────────
