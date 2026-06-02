@@ -49,3 +49,4 @@ Thumbs.db
 
 # Zip de fontes (não é necessário no servidor)
 *.zip
+Backend/main.ipynb
