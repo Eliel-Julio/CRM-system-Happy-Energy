@@ -3,4 +3,5 @@ Flask-Cors
 SQLAlchemy
 reportlab
 requests
+python-dotenv
 gunicorn
