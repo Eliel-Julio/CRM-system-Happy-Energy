@@ -1,3 +1,51 @@
 *.db
 *.zip
 Backend/render/dados.md
+files.py
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Ambiente virtual
+venv/
+env/
+.venv/
+
+# Banco de dados local (vai para disco persistente no Render)
+Backend/Database/*.db
+Backend/Database/*.sqlite3
+*.db
+*.sqlite
+
+# PDFs gerados
+*.pdf
+proposta_*.pdf
+
+# Bootstrap local — use o CDN no lugar
+Front/bootstrap-5.3.8/
+
+# Jupyter
+*.ipynb
+*.ipynb_checkpoints/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Variáveis de ambiente
+.env
+.env.local
+
+# Zip de fontes (não é necessário no servidor)
+*.zip
