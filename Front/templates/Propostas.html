@@ -11,61 +11,65 @@
         .btn-form-group {
             display: flex;
             gap: 0.5rem;
-            margin-top: 0.5rem;
+            margin-top: 1rem;
         }
 
         /* Status badge colors */
-        .badge-pendente   { background-color: #f0ad4e; color: #fff; padding: 0.3rem 0.7rem; border-radius: 50px; font-size: 0.78rem; }
-        .badge-aprovada   { background-color: #2ecc71; color: #fff; padding: 0.3rem 0.7rem; border-radius: 50px; font-size: 0.78rem; }
-        .badge-recusada   { background-color: #e74c3c; color: #fff; padding: 0.3rem 0.7rem; border-radius: 50px; font-size: 0.78rem; }
-        .badge-expirada   { background-color: #95a5a6; color: #fff; padding: 0.3rem 0.7rem; border-radius: 50px; font-size: 0.78rem; }
+        .badge-pendente   { background-color: #f39c12; color: #fff; padding: 0.35rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
+        .badge-aprovada   { background-color: #2ecc71; color: #fff; padding: 0.35rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
+        .badge-recusada   { background-color: #e74c3c; color: #fff; padding: 0.35rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
+        .badge-expirada   { background-color: #95a5a6; color: #fff; padding: 0.35rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
 
         .proposta-item {
             background: white;
             border: 1px solid #e9ecef;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 0.85rem;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            transition: all 0.3s ease;
+            align-items: center;
+            transition: all 0.25s ease-in-out;
         }
         .proposta-item:hover {
             border-color: var(--primary-color);
-            box-shadow: 0 2px 6px rgba(46, 204, 113, 0.15);
+            box-shadow: 0 4px 12px rgba(1, 36, 74, 0.08);
+            transform: translateY(-1px);
         }
         .proposta-info h5 {
-            margin: 0 0 0.3rem 0;
+            margin: 0 0 0.4rem 0;
             color: #212529;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .proposta-info p {
-            margin: 0.2rem 0;
+            margin: 0.25rem 0;
             color: #6c757d;
-            font-size: 0.85rem;
-            line-height: 1.3;
+            font-size: 0.875rem;
+            line-height: 1.4;
         }
         .proposta-info p strong { color: #495057; }
 
         .proposta-actions {
             display: flex;
-            gap: 0.35rem;
+            gap: 0.4rem;
             flex-shrink: 0;
             margin-left: 1rem;
-            align-items: flex-start;
         }
         .proposta-actions .btn {
-            padding: 0.35rem 0.5rem;
-            font-size: 0.8rem;
+            padding: 0.4rem 0.55rem;
+            font-size: 0.85rem;
+            border-radius: 0.35rem;
         }
 
-        /* Modal custom */
-        .modal-detalhe .modal-header { background: var(--primary-color); color: white; }
-        .modal-detalhe .modal-title { font-weight: 700; }
-        .modal-detalhe .detail-section { margin-bottom: 1rem; }
-        .modal-detalhe .detail-section h6 {
+        /* Modais Customizados */
+        .modal-custom .modal-header { background: var(--primary-color); color: white; border-bottom: none; }
+        .modal-custom .modal-title { font-weight: 600; font-size: 1.15rem; }
+        .modal-custom .detail-section { margin-bottom: 1.25rem; }
+        .modal-custom .detail-section h6 {
             font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -73,29 +77,42 @@
             color: #6c757d;
             border-bottom: 1px solid #dee2e6;
             padding-bottom: 0.3rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
         }
-        .modal-detalhe .detail-row {
+        .modal-custom .detail-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.875rem;
-            padding: 0.2rem 0;
+            font-size: 0.9rem;
+            padding: 0.3rem 0;
+            border-bottom: 1px dashed #f1f3f5;
         }
-        .modal-detalhe .detail-row span:first-child { color: #6c757d; }
-        .modal-detalhe .detail-row span:last-child { font-weight: 600; color: #212529; }
-        .modal-detalhe .valor-total {
-            background: #f8f9fa;
-            border-radius: 0.4rem;
-            padding: 0.75rem;
+        .modal-custom .detail-row:last-child { border-bottom: none; }
+        .modal-custom .detail-row span:first-child { color: #6c757d; }
+        .modal-custom .detail-row span:last-child { font-weight: 600; color: #212529; }
+        
+        .modal-custom .valor-total {
+            background: #eef2f7;
+            border-radius: 0.5rem;
+            padding: 1rem;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.35rem;
             font-weight: 700;
             color: var(--primary-color);
+            margin-top: 1rem;
+        }
+
+        /* Grupo do Select com botão de Preview */
+        .select-preview-group {
+            display: flex;
+            gap: 0.35rem;
+        }
+        .select-preview-group .btn-preview {
+            padding: 0.4rem 0.75rem;
+            border-radius: 0.35rem;
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar">
         {{url_for('index')}};
         {{url_for('configuracoes')}};
@@ -104,9 +121,8 @@
         {{url_for('propostas')}};
     </nav>
 
-    <!-- Hero Section -->
     <main class="container-fluid px-4 px-lg-5">
-        <div class="hero-section">
+        <div class="hero-section mt-3">
             <div class="container">
                 <h1><i class="bi bi-file-earmark-text"></i> Propostas</h1>
                 <p class="lead mb-0">Gere e acompanhe propostas comerciais para seus clientes.</p>
@@ -115,24 +131,33 @@
 
         <div class="container-lg">
 
-            <!-- Form: Nova Proposta -->
-            <div class="form-section">
+            <div class="form-section shadow-sm border">
                 <h3><i class="bi bi-plus-circle"></i> Nova Proposta</h3>
                 <form id="formNovaProposta">
                     <div class="form-grid-compact">
 
                         <div class="form-group-compact">
                             <label for="clienteId" class="form-label">Cliente *</label>
-                            <select class="form-select" id="clienteId" required>
-                                <option value="">Selecione um cliente...</option>
-                            </select>
+                            <div class="select-preview-group">
+                                <select class="form-select" id="clienteId" required>
+                                    <option value="">Selecione um cliente...</option>
+                                </select>
+                                <button type="button" class="btn btn-outline-secondary btn-preview" id="btnPreviewCliente" title="Visualizar dados do cliente" disabled>
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="form-group-compact">
                             <label for="kitId" class="form-label">Kit *</label>
-                            <select class="form-select" id="kitId" required>
-                                <option value="">Selecione um kit...</option>
-                            </select>
+                            <div class="select-preview-group">
+                                <select class="form-select" id="kitId" required>
+                                    <option value="">Selecione um kit...</option>
+                                </select>
+                                <button type="button" class="btn btn-outline-secondary btn-preview" id="btnPreviewKit" title="Visualizar dados do kit" disabled>
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="form-group-compact">
@@ -164,27 +189,28 @@
                     </div>
 
                     <div class="btn-form-group">
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="bi bi-plus"></i> Gerar Proposta
+                        <button type="submit" class="btn btn-primary btn-sm px-3">
+                            <i class="bi bi-plus-lg"></i> Gerar Proposta
                         </button>
-                        <button type="reset" class="btn btn-outline-secondary btn-sm">
+                        <button type="reset" class="btn btn-outline-secondary btn-sm px-3" id="btnLimparForm">
                             <i class="bi bi-arrow-clockwise"></i> Limpar
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- Listagem de Propostas -->
-            <div class="section-card">
+            <div class="section-card border shadow-sm">
                 <div class="card-header">
                     <h2><i class="bi bi-list-ul"></i> Listagem de Propostas</h2>
                 </div>
                 <div class="card-body">
 
-                    <!-- Filtros -->
-                    <div class="row g-2 mb-2">
+                    <div class="row g-3 mb-4 align-items-center">
                         <div class="col-md-5">
-                            <input type="text" class="form-control form-control-sm" id="searchProposta" placeholder="Buscar por cliente ou kit...">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white text-muted"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control form-control-sm border-start-0 ps-0" id="searchProposta" placeholder="Buscar por cliente ou kit...">
+                            </div>
                         </div>
                         <div class="col-md-4">
                             <select class="form-select form-select-sm" id="filterStatus">
@@ -196,38 +222,50 @@
                             </select>
                         </div>
                         <div class="col-md-3 text-end">
-                            <span class="text-muted small" id="totalPropostas"></span>
+                            <span class="badge bg-light text-dark border p-2 small fw-normal" id="totalPropostas"></span>
                         </div>
                     </div>
 
-                    <!-- Container de Propostas -->
                     <div id="propostasContainer"></div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modal de Detalhes -->
-    <div class="modal fade modal-detalhe" id="modalDetalheProposta" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+    <div class="modal fade modal-custom" id="modalDetalheProposta" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-file-earmark-text me-2"></i>Detalhes da Proposta</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="modalCorpo">
-                    <!-- preenchido via JS -->
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
-                    <button class="btn btn-success btn-sm" id="btnAprovarModal"><i class="bi bi-check-circle"></i> Aprovar</button>
-                    <button class="btn btn-danger btn-sm" id="btnRecusarModal"><i class="bi bi-x-circle"></i> Recusar</button>
+                    </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Fechar</button>
+                    <button class="btn btn-success btn-sm px-3" id="btnAprovarModal"><i class="bi bi-check-circle"></i> Aprovar</button>
+                    <button class="btn btn-danger btn-sm px-3" id="btnRecusarModal"><i class="bi bi-x-circle"></i> Recusar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
+    <div class="modal fade modal-custom" id="modalPreviewSelect" tabindex="-1">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPreviewTitulo">Visualização rápida</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalPreviewCorpo">
+                    </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
             <p>&copy; 2026 Happy Energy. Todos os direitos reservados.</p>
@@ -238,6 +276,8 @@
     <script>
         const BASE = 'http://127.0.0.1:5000';
         let propostasGlobal = [];
+        let clientesGlobal = [];
+        let kitsGlobal = [];
         let propostaIdAtivo = null;
 
         // ── Utilitários ────────────────────────────────────────────────
@@ -251,11 +291,11 @@
 
         function mostrarAlerta(mensagem, tipo = 'info') {
             const alerta = document.createElement('div');
-            alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+            alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed top-0 end-0 m-3 shadow`;
+            alerta.style.zIndex = '9999';
             alerta.role = 'alert';
             alerta.innerHTML = `${mensagem}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-            const container = document.querySelector('.container-lg');
-            container.insertBefore(alerta, container.firstChild);
+            document.body.appendChild(alerta);
             setTimeout(() => alerta.remove(), 4000);
         }
 
@@ -266,11 +306,11 @@
                     fetch(`${BASE}/get_leads`),
                     fetch(`${BASE}/get_kits`)
                 ]);
-                const clientes = await resClientes.json();
-                const kits     = await resKits.json();
+                clientesGlobal = await resClientes.json();
+                kitsGlobal     = await resKits.json();
 
                 const selCliente = document.getElementById('clienteId');
-                clientes.forEach(c => {
+                clientesGlobal.forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c.id;
                     opt.textContent = `${c.nome} — ${c.cidade_uf}`;
@@ -278,16 +318,76 @@
                 });
 
                 const selKit = document.getElementById('kitId');
-                kits.forEach(k => {
+                kitsGlobal.forEach(k => {
                     const opt = document.createElement('option');
                     opt.value = k.id;
-                    opt.textContent = `${k.nome} (${k.modulo_json.quantidade} W)`;
+                    opt.textContent = `${k.nome} (${k.modulo_json.quantidade || k.modulo_json.quantidade_modulos || 0} W)`;
                     selKit.appendChild(opt);
                 });
             } catch (e) {
                 console.error('Erro ao carregar selects:', e);
             }
         }
+
+        // Monitorar alteração nos Selects para habilitar/desabilitar botões de preview
+        document.getElementById('clienteId').addEventListener('change', function() {
+            document.getElementById('btnPreviewCliente').disabled = !this.value;
+        });
+
+        document.getElementById('kitId').addEventListener('change', function() {
+            document.getElementById('btnPreviewKit').disabled = !this.value;
+        });
+
+        document.getElementById('btnLimparForm').addEventListener('click', function() {
+            document.getElementById('btnPreviewCliente').disabled = true;
+            document.getElementById('btnPreviewKit').disabled = true;
+        });
+
+        // Eventos de click nos botões de Preview dos Selects
+        document.getElementById('btnPreviewCliente').addEventListener('click', () => {
+            const id = parseInt(document.getElementById('clienteId').value);
+            const cliente = clientesGlobal.find(c => c.id === id);
+            if (!cliente) return;
+
+            document.getElementById('modalPreviewTitulo').innerHTML = `<i class="bi bi-person-bounding-box me-2"></i> Dados do Cliente`;
+            document.getElementById('modalPreviewCorpo').innerHTML = `
+                <div class="modal-custom">
+                    <div class="detail-section">
+                        <h6>Informações de Cadastro</h6>
+                        <div class="detail-row"><span>Nome</span><span>${cliente.nome || '—'}</span></div>
+                        <div class="detail-row"><span>CPF/CNPJ</span><span>${cliente.cpf || '—'}</span></div>
+                        <div class="detail-row"><span>E-mail</span><span>${cliente.email || '—'}</span></div>
+                        <div class="detail-row"><span>Telefone</span><span>${cliente.telefone || '—'}</span></div>
+                        <div class="detail-row"><span>Cidade/UF</span><span>${cliente.cidade_uf || '—'}</span></div>
+                    </div>
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById('modalPreviewSelect')).show();
+        });
+
+        document.getElementById('btnPreviewKit').addEventListener('click', () => {
+            const id = parseInt(document.getElementById('kitId').value);
+            const kit = kitsGlobal.find(k => k.id === id);
+            if (!kit) return;
+
+            const kj = kit.modulo_json || {};
+
+            document.getElementById('modalPreviewTitulo').innerHTML = `<i class="bi bi-box-seam me-2"></i> Detalhes do Kit`;
+            document.getElementById('modalPreviewCorpo').innerHTML = `
+                <div class="modal-custom">
+                    <div class="detail-section">
+                        <h6>Especificações Técnicas</h6>
+                        <div class="detail-row"><span>Nome do Kit</span><span>${kit.nome || '—'}</span></div>
+                        <div class="detail-row"><span>Módulos</span><span>${kj.quantidade || '—'} × ${kj.potencia || '—'} W</span></div>
+                        <div class="detail-row"><span>Inversor</span><span>${(kit.inversor_json && kit.inversor_json.modelo) || '—'}</span></div>
+                    </div>
+                    <div class="valor-total">
+                        Preço de Custo: ${formatBRL(kit.preco_c || 0)}
+                    </div>
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById('modalPreviewSelect')).show();
+        });
 
         // ── Carregar e renderizar propostas ───────────────────────────
         function carregarPropostas() {
@@ -303,14 +403,14 @@
         function renderizarPropostas(lista) {
             const container = document.getElementById('propostasContainer');
             document.getElementById('totalPropostas').textContent =
-                lista.length === 1 ? '1 proposta' : `${lista.length} propostas`;
+                lista.length === 1 ? '1 proposta gerada' : `${lista.length} propostas geradas`;
 
             if (lista.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="bi bi-inbox"></i>
-                        <h5>Nenhuma proposta encontrada</h5>
-                        <p>Gere sua primeira proposta usando o formulário acima</p>
+                    <div class="empty-state py-5 border rounded bg-light text-center">
+                        <i class="bi bi-inbox d-block mb-2 text-muted" style="font-size: 2.5rem;"></i>
+                        <h5 class="text-dark">Nenhuma proposta encontrada</h5>
+                        <p class="text-muted mb-0">Gere sua primeira proposta utilizando o formulário de cadastro acima.</p>
                     </div>`;
                 return;
             }
@@ -319,39 +419,38 @@
                 <div class="proposta-item">
                     <div class="proposta-info">
                         <h5>
-                            <i class="bi bi-person-fill me-1 text-muted"></i>${p.cliente_nome || 'Cliente #' + p.cliente_id}
-                            &nbsp;${badgeStatus(p.status)}
+                            <i class="bi bi-person text-muted"></i> ${p.cliente_nome || 'Cliente #' + p.cliente_id}
+                            ${badgeStatus(p.status)}
                         </h5>
-                        <p><strong>Kit:</strong> ${p.kit_nome || 'Kit #' + p.kit_id}
-                           &nbsp;|&nbsp;<strong>Valor:</strong> ${formatBRL(p.valor_total)}</p>
-                        <p><strong>Pagamento:</strong> ${p.forma_pgto || '—'}
-                           &nbsp;|&nbsp;<strong>Validade:</strong> ${p.validade_proposta} dias
-                           &nbsp;|&nbsp;<strong>Instalação:</strong> ${p.prazo_instalacao} dias</p>
-                        ${p.condicao_pgto ? `<p><em>${p.condicao_pgto}</em></p>` : ''}
+                        <p class="mb-1"><strong class="text-secondary"><i class="bi bi-box-seam"></i> Kit:</strong> ${p.kit_nome || 'Kit #' + p.kit_id}
+                           &nbsp;|&nbsp; <strong><i class="bi bi-cash-stack"></i> Valor:</strong> <span class="text-dark fw-bold">${formatBRL(p.valor_total)}</span></p>
+                        <p class="text-muted small mb-0">
+                           <i class="bi bi-credit-card"></i> Pagamento: ${p.forma_pgto || '—'}
+                           &nbsp;•&nbsp; <i class="bi bi-calendar-check"></i> Validade: ${p.validade_proposta} dias
+                           &nbsp;•&nbsp; <i class="bi bi-truck"></i> Instalação: ${p.prazo_instalacao} dias
+                        </p>
+                        ${p.condicao_pgto ? `<p class="mt-1 mb-0 text-muted"><em><i class="bi bi-info-circle"></i> ${p.condicao_pgto}</em></p>` : ''}
                     </div>
                     <div class="proposta-actions">
-                        <button class="btn btn-sm btn-outline-info" onclick="verDetalhes(${p.id})" title="Detalhes">
+                        <button class="btn btn-sm btn-outline-info" onclick="verDetalhes(${p.id})" title="Ver Detalhes Ampliados">
                             <i class="bi bi-eye"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-success" onclick="alterarStatus(${p.id}, 'aprovada')" title="Aprovar">
+                        <button class="btn btn-sm btn-outline-success" onclick="alterarStatus(${p.id}, 'aprovada')" title="Aprovar Proposta">
                             <i class="bi bi-check-lg"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-warning" onclick="alterarStatus(${p.id}, 'recusada')" title="Recusar">
+                        <button class="btn btn-sm btn-outline-warning" onclick="alterarStatus(${p.id}, 'recusada')" title="Recusar Proposta">
                             <i class="bi bi-x-lg"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deletarProposta(${p.id})" title="Deletar">
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletarProposta(${p.id})" title="Excluir">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <a class="btn btn-sm btn-outline-primary" href="${BASE}/download_orcamento/${p.id}" download title="Download PDF">
+                        <a class="btn btn-sm btn-outline-primary" href="${BASE}/download_orcamento/${p.id}" download title="Baixar PDF Comercial">
                             <i class="bi bi-download"></i>
                         </a>
                     </div>
                 </div>
             `).join('');
         }
-
-        // ── Baixar proposta (download) ──────────────────────────────
-        // O download é feito diretamente pelo atributo href/download do elemento <a>
 
         // ── Adicionar nova proposta ────────────────────────────────────
         document.getElementById('formNovaProposta').addEventListener('submit', async (e) => {
@@ -375,6 +474,8 @@
                 const resultado = await res.json();
                 if (res.ok) {
                     document.getElementById('formNovaProposta').reset();
+                    document.getElementById('btnPreviewCliente').disabled = true;
+                    document.getElementById('btnPreviewKit').disabled = true;
                     mostrarAlerta('Proposta gerada com sucesso!', 'success');
                     carregarPropostas();
                 } else {
@@ -387,7 +488,7 @@
 
         // ── Deletar ────────────────────────────────────────────────────
         function deletarProposta(id) {
-            if (!confirm('Deseja realmente excluir esta proposta?')) return;
+            if (!confirm('Deseja realmente excluir esta proposta permanentemente?')) return;
             fetch(`${BASE}/deletar_proposta/${id}`, { method: 'DELETE' })
                 .then(r => r.json())
                 .then(data => {
@@ -411,7 +512,7 @@
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    mostrarAlerta(`Proposta marcada como ${novoStatus}.`, 'success');
+                    mostrarAlerta(`Proposta alterada para status "${novoStatus}" com sucesso.`, 'success');
                     carregarPropostas();
                 } else {
                     mostrarAlerta('Erro: ' + data.error, 'danger');
@@ -420,7 +521,7 @@
             .catch(e => mostrarAlerta('Erro: ' + e.message, 'danger'));
         }
 
-        // ── Modal de detalhes ──────────────────────────────────────────
+        // ── Modal de detalhes completos da proposta ─────────────────────
         function verDetalhes(id) {
             propostaIdAtivo = id;
             const p = propostasGlobal.find(x => x.id === id);
@@ -430,35 +531,37 @@
             const cj = p.cliente_json || {};
 
             document.getElementById('modalCorpo').innerHTML = `
-                <div class="detail-section">
-                    <h6><i class="bi bi-person me-1"></i>Cliente</h6>
-                    <div class="detail-row"><span>Nome</span><span>${cj.nome || p.cliente_nome || '—'}</span></div>
-                    <div class="detail-row"><span>CPF</span><span>${cj.cpf || '—'}</span></div>
-                    <div class="detail-row"><span>E-mail</span><span>${cj.email || '—'}</span></div>
-                    <div class="detail-row"><span>Telefone</span><span>${cj.telefone || '—'}</span></div>
-                    <div class="detail-row"><span>Cidade/UF</span><span>${cj.cidade_uf || '—'}</span></div>
-                </div>
-                <div class="detail-section">
-                    <h6><i class="bi bi-box-seam me-1"></i>Kit</h6>
-                    <div class="detail-row"><span>Nome</span><span>${kj.nome || p.kit_nome || '—'}</span></div>
-                    <div class="detail-row"><span>Módulos</span><span>${kj.n_modulos || '—'} × ${kj.p_modulos || '—'} W</span></div>
-                    <div class="detail-row"><span>Inversor</span><span>${(kj.inversor_json && kj.inversor_json.modelo) || '—'}</span></div>
-                    <div class="detail-row"><span>Custo do kit</span><span>${formatBRL(kj.preco_c || 0)}</span></div>
-                </div>
-                <div class="detail-section">
-                    <h6><i class="bi bi-credit-card me-1"></i>Condições Comerciais</h6>
-                    <div class="detail-row"><span>Forma de pagamento</span><span>${p.forma_pgto || '—'}</span></div>
-                    <div class="detail-row"><span>Condição</span><span>${p.condicao_pgto || '—'}</span></div>
-                    <div class="detail-row"><span>Validade</span><span>${p.validade_proposta} dias</span></div>
-                    <div class="detail-row"><span>Prazo de instalação</span><span>${p.prazo_instalacao} dias</span></div>
-                    <div class="detail-row"><span>Status</span><span>${badgeStatus(p.status)}</span></div>
-                </div>
-                <div class="valor-total">
-                    Valor Total: ${formatBRL(p.valor_total)}
+                <div class="modal-custom">
+                    <div class="detail-section">
+                        <h6><i class="bi bi-person me-1"></i>Cliente Associado</h6>
+                        <div class="detail-row"><span>Nome</span><span>${cj.nome || p.cliente_nome || '—'}</span></div>
+                        <div class="detail-row"><span>CPF</span><span>${cj.cpf || '—'}</span></div>
+                        <div class="detail-row"><span>E-mail</span><span>${cj.email || '—'}</span></div>
+                        <div class="detail-row"><span>Telefone</span><span>${cj.telefone || '—'}</span></div>
+                        <div class="detail-row"><span>Cidade/UF</span><span>${cj.cidade_uf || '—'}</span></div>
+                    </div>
+                    <div class="detail-section">
+                        <h6><i class="bi bi-box-seam me-1"></i>Estrutura do Kit</h6>
+                        <div class="detail-row"><span>Nome do Kit</span><span>${kj.nome || p.kit_nome || '—'}</span></div>
+                        <div class="detail-row"><span>Módulos</span><span>${kj.n_modulos || '—'} × ${kj.p_modulos || '—'} W</span></div>
+                        <div class="detail-row"><span>Inversor</span><span>${(kj.inversor_json && kj.inversor_json.modelo) || '—'}</span></div>
+                        <div class="detail-row"><span>Custo Base</span><span>${formatBRL(kj.preco_c || 0)}</span></div>
+                    </div>
+                    <div class="detail-section">
+                        <h6><i class="bi bi-credit-card me-1"></i>Termos e Condições Comerciais</h6>
+                        <div class="detail-row"><span>Forma de pagamento</span><span>${p.forma_pgto || '—'}</span></div>
+                        <div class="detail-row"><span>Condição de pagamento</span><span>${p.condicao_pgto || '—'}</span></div>
+                        <div class="detail-row"><span>Prazo de Validade</span><span>${p.validade_proposta} dias</span></div>
+                        <div class="detail-row"><span>Tempo Estimado de Instalação</span><span>${p.prazo_instalacao} dias</span></div>
+                        <div class="detail-row"><span>Status Atual</span><span>${badgeStatus(p.status)}</span></div>
+                    </div>
+                    <div class="valor-total shadow-sm">
+                        Valor Proposto ao Cliente: ${formatBRL(p.valor_total)}
+                    </div>
                 </div>
             `;
 
-            // botões do modal
+            // Configuração dinâmica dos botões internos do modal
             document.getElementById('btnAprovarModal').onclick = () => {
                 alterarStatus(id, 'aprovada');
                 bootstrap.Modal.getInstance(document.getElementById('modalDetalheProposta')).hide();
@@ -471,7 +574,7 @@
             new bootstrap.Modal(document.getElementById('modalDetalheProposta')).show();
         }
 
-        // ── Filtros ────────────────────────────────────────────────────
+        // ── Filtros em tempo real ───────────────────────────────────────
         function filtrarPropostas() {
             const busca   = document.getElementById('searchProposta').value.toLowerCase();
             const status  = document.getElementById('filterStatus').value;
@@ -490,7 +593,7 @@
         document.getElementById('searchProposta').addEventListener('input', filtrarPropostas);
         document.getElementById('filterStatus').addEventListener('change', filtrarPropostas);
 
-        // ── Init ───────────────────────────────────────────────────────
+        // ── Inicialização ──────────────────────────────────────────────
         carregarSelects();
         carregarPropostas();
     </script>

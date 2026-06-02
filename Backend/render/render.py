@@ -54,12 +54,18 @@ def render_proposta_p1(dados: dict, documento=None):
 
     cabeçalho_y, tamanho_fonte = 300, 18
 
+    # Atalhos para sub-dicionários
+    cliente  = dados.get('cliente_json', {})
+    kit      = dados.get('kit_json', {})
+    modulos  = kit.get('modulos_json', {})
+    potencia_kit = (modulos.get('potencia', 610) * modulos.get('quantidade', 12)) / 1000
+
     linhas_cabecalho = [
-        ("Proposta Nº: ", f"{dados['id']}", ""),
+        ("Proposta Nº: ", f"{dados.get('id', 'N/A')}", ""),
         ("Data: ", f"{dados.get('data', 'N/A')}", ""),
-        ("Cliente: ", f"{dados.get('nome', 'N/A')}", ""),
-        ("Potência a ser instalada: ", f"{dados.get('potencia_kit', 'N/A')}", " kWp"),
-        ("Cidade: ", f"{dados.get('cidade-uf', 'N/A')}", "")
+        ("Cliente: ", f"{cliente.get('nome', 'N/A')}", ""),
+        ("Potência a ser instalada: ", f"{potencia_kit:.2f}", " kWp"),
+        ("Cidade: ", f"{cliente.get('cidade_uf', 'N/A').replace('_', '-')}", "")
     ]
 
     register_font(documento, font_name='TrebuchetMS.ttf', call='TrebuchetMS')
@@ -103,11 +109,19 @@ def render_proposta_p5(dados: dict, documento):
     # Imagem de dados do cliente
     documento.drawImage(file_route("dados do cliente.png"), sheet_padding_left, A4[1]-(1.59*CM)-sheet_padding_top, width=8.94*CM, height=1.59*CM)
     
+    cliente  = dados.get('cliente_json', {})
+    kit      = dados.get('kit_json', {})
+    modulos  = kit.get('modulos_json', {})
+    inversor_j = kit.get('inversor_json', {})
+    consts   = dados.get('consts', {})
+    CONST_IRRAD  = float(consts.get('fator solar', 139))
+    potencia_kit = (modulos.get('potencia', 610) * modulos.get('quantidade', 12)) / 1000
+
     dados_cliente = [
-        ("Cliente: ", dados.get("nome", "N/A")),
-        ("Telefone: ", dados.get("telefone", "N/A")),
-        ("Endereço: ", dados.get("endereco", "N/A")),
-        ("Email: ", dados.get("email", "N/A")),
+        ("Cliente: ",   cliente.get("nome", "N/A")),
+        ("Telefone: ",  cliente.get("telefone", "N/A")),
+        ("Endereço: ",  cliente.get("endereco", "N/A")),
+        ("Email: ",     cliente.get("email", "N/A")),
     ]
     
     y = A4[1] - (1.59 * CM) - sheet_padding_top - 10 - p_LINE_HEIGHT
@@ -119,15 +133,16 @@ def render_proposta_p5(dados: dict, documento):
         y -= p_LINE_HEIGHT
 
     # Tabela de especificações do sistema
+    area_total = inversor_j.get('area', 2) * modulos.get('quantidade', 12)
     dados_tabela, largura_colunas = [
         ['PRODUÇÃO MÉDIA', 'ÁREA TOTAL', 'PRODUÇÃO ANUAL', 'POTÊNCIA DO SISTEMA'],
         [
-            f"{(dados.get('potencia_kit', 7.32) * dados.get('CONST_IRRAD', 139)):.2f} kWh", 
-            f"{(dados.get('modulos', {'area': 2.39*1.14}).get('area', 0)*dados.get('modulos', {'quantidade': 12}).get('quantidade', 0)*1.1):.2f} m²", 
-            f"{dados.get('potencia_kit', 7.32) * 12 * dados.get('CONST_IRRAD', 139)} kWh", 
-            f"{dados.get('potencia_kit', 7.32)} kWp"
+            f"{(potencia_kit * CONST_IRRAD):.2f} kWh",
+            f"{area_total:.2f} m²",
+            f"{potencia_kit * 12 * CONST_IRRAD:.2f} kWh",
+            f"{potencia_kit:.2f} kWp"
         ]
-    ], [115, 115, 115, 115] 
+    ], [115, 115, 115, 115]
     
     tabela = Table(dados_tabela, colWidths=largura_colunas)
     tabela.setStyle(TableStyle([
@@ -155,8 +170,8 @@ def render_proposta_p5(dados: dict, documento):
     documento.drawImage(file_route("comparativo.png"), sheet_padding_left, y, width=15.5*CM, height=1.69*CM)
 
     meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-    consumo = [0.8*dados.get('potencia_kit',7.32)*dados.get('CONSTS',{'CONST_IRRAD':139}).get('CONST_IRRAD',139)]*12
-    geracao = [v*dados.get('potencia_kit', 7.32)*dados.get('CONSTS',{'CONST_IRRAD':139}).get('CONST_IRRAD',139)/6.38 for v in [6.38,6.16,6.03,5.24,4.83,4.58,4.82,5.55,6.32,6.4,6.5,6.38]]
+    consumo = [0.8 * potencia_kit * CONST_IRRAD] * 12
+    geracao = [v * potencia_kit * CONST_IRRAD / 6.38 for v in [6.38,6.16,6.03,5.24,4.83,4.58,4.82,5.55,6.32,6.4,6.5,6.38]]
     
     largura_desenho = 17.09 * CM
     altura_desenho = 8.0 * CM
@@ -222,11 +237,18 @@ def render_proposta_p6(dados: dict, documento):
     img_inversor = Image(file_route("inversor weg.png"), width=2.5*CM, height=2.5*CM)
 
     # Texto longo da descrição formatado com quebras de linha para a tabela respeitar
+    _kit      = dados.get('kit_json', {})
+    _modulos  = _kit.get('modulos_json', {})
+    _inversor = _kit.get('inversor_json', {})
+    _estrutura= _kit.get('estrutura_json', {})
+    _garantias= _kit.get('garantias_json', {})
+    _potencia_kit = (_modulos.get('potencia', 610) * _modulos.get('quantidade', 12)) / 1000
+
     descricao_texto = (
         "DESCRIÇÃO:\n"
-        f"{dados.get('qtd_modulos', '12')} MÓDULO {dados.get('modulos',{'modelo': '--.--'}).get('modelo')}\n"
-        f"{dados.get('qtd_inversores', '01')} INVERSOR {dados.get('inversores', {'marca': 'WEG'}).get('marca', 'WEG')} {dados.get('inversores', {'modelo': '615 Wp - WEG BIFACIAL'}).get('modelo','615 Wp - WEG BIFACIAL')}\n"
-        f"ESTRUTURA DE FIXAÇÃO {dados.get('estrutura', {'tipo': 'Fibrocimento'}).get('tipo','Fibrocimento')}\n"
+        f"{_modulos.get('quantidade', 12)} MÓDULO {_modulos.get('modelo', '--.--')}\n"
+        f"{_inversor.get('quantidade', 1):02d} INVERSOR {_inversor.get('marca', 'WEG')} {_inversor.get('modelo', '--.--')}\n"
+        f"ESTRUTURA DE FIXAÇÃO {_estrutura.get('tipo', 'Fibrocimento')}\n"
         "KIT COMPLETO DE INSTALAÇÃO"
     )
 
@@ -235,9 +257,9 @@ def render_proposta_p6(dados: dict, documento):
         # Linha 0: Cabeçalho
         ['ITEM', 'QUANTIDADE', 'IMAGEM'],
         # Linha 1: Dados principais do Kit
-        [f"KIT {dados.get('potencia_kit', '--.--')} kwp {dados.get('inversor',{'marca':''}.get('marca',''))} LAJE", "1", img_inversor],
+        [f"KIT {_potencia_kit:.2f} kWp {_inversor.get('marca', '')} LAJE", "1", img_inversor],
         # Linhas 2: Reservada para a descrição longa expandida (via SPAN)
-        [dados.get('descricao', ''), '', '']
+        [_kit.get('descricao', descricao_texto), '', '']
     ]
 
     # Larguras das colunas somando exatamente 17.09 CM (para alinhar com o seu gráfico)
@@ -292,7 +314,7 @@ def render_proposta_p6(dados: dict, documento):
     
     tabela.drawOn(documento, (A4[0] - tabela_width) / 2, y)
 
-    tabela_=Table([[f"Valor total: R$ {tousand_separator(dados.get('valor', '0.00'))}"]], colWidths=[A4[0]-3*CM])
+    tabela_=Table([[f"Valor total: R$ {tousand_separator(dados.get('valor_total', 0.0))}"]], colWidths=[A4[0]-3*CM])
     tabela_.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), HexColor("#000000")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#fbfbfb')),
@@ -306,9 +328,8 @@ def render_proposta_p6(dados: dict, documento):
     documento.drawImage(file_route("garantias.png"), sheet_padding_left, y, width=10.9*CM, height=1.77*CM)
 
     garantias =[
-        ['Painel',dados.get('garantias', {'painel': 'N/A'}).get('painel', 'N/A'),'serviço', dados.get('garantias', {'instalacao': 'N/A'}).get('instalacao', 'N/A')],
-        # [None,None,None,None],
-        ['Inversor',dados.get('garantias', {'inversor': 'N/A'}).get('inversor', 'N/A'),'Estrutura', dados.get('garantias', {'estrutura': 'N/A'}).get('estrutura', 'N/A')]
+        ['Painel',   f"{_garantias.get('painel', 'N/A')} anos",   'Serviço',   f"{_garantias.get('instalacao', 'N/A')} ano"],
+        ['Inversor', f"{_garantias.get('inversor', 'N/A')} anos", 'Estrutura', f"{_garantias.get('estrutura', 'N/A')} anos"]
     ]
 
     tabela_garantias = Table(garantias, colWidths=[4.5*CM, 3.5*CM, 4.5*CM, 3.5*CM])
@@ -505,23 +526,32 @@ def render_grafico_investimento(dados: dict, documento, y=A4[1]):
     return documento
 
 def gen_finace_data(dados: dict):
-    # fator_diurno, consumo_mes, TUSDgd = 0.5, 3700, 0.2 
-    CONSTS=dados.get("CONSTS", {})
-#    "CONSTS": {
-#         "CONST_IRRAD": 139,
-#         "CONST_FATOR_DIURNO": 0.5,
-#         "CONST_TUSDgd": 0.2,
-#         "CRECIMENTO_ANUAL_CONSUMO": 0.0081,
-#         "DECRESCIMO_GERACAO": 0.15
-#     },
+    # Lê a estrutura real do dicionário vindo de dados.md
+    _kit   = dados.get('kit_json', {})
+    _mod   = _kit.get('modulos_json', {})
+    _consts_raw = dados.get('consts', {})
+    # Monta CONSTS com defaults razoáveis a partir das chaves reais disponíveis
+    CONSTS = {
+        'CONST_IRRAD':              float(_consts_raw.get('fator solar', 139)),
+        'CONST_FATOR_DIURNO':       float(_consts_raw.get('fator_diurno', 0.5)),
+        'CONST_TUSDgd':             float(_consts_raw.get('TUSDgd', 0.2)),
+        'CRECIMENTO_ANUAL_CONSUMO': float(_consts_raw.get('crescimento_anual_consumo', 0.2)),
+        'DECRESCIMO_GERACAO':       float(_consts_raw.get('decrescimo_geracao', 0.0081)),
+        'TARIFA_INICIAL':           float(_consts_raw.get('tarifa_inicial', 1.22)),
+        'TARIFA_INFLACAO_ANUAL':    float(_consts_raw.get('inflacao_anual', 0.08)),
+        'MANUTENCAO_INFLACAO_ANUAL':float(_consts_raw.get('manutencao_inflacao_anual', 0.03)),
+        'validade_proposta':        f"{dados.get('validade_proposta', 30)} dias",
+    }
+    potencia_kit = (_mod.get('potencia', 610) * _mod.get('quantidade', 12)) / 1000
+
     ano = ['1|0.6', '2|1', '3|2', '4|3', '5|4', '6|5', '7|6', '8|7', '9|8', '10|9', '11|10', '12|11', '13|12', '14|13', '15|14', '16|15', '17|16', '18|17', '19|18', '20|19', '21|20', '22|21', '23|22', '24|23', '25|24']
     fluxo_caixa_acumulado = []
-    energia_gerada = [12 * dados.get('potencia_kit', 7.32) * CONSTS.get('CONST_IRRAD', 139) * (1-CONSTS.get('DECRESCIMO_GERACAO', 0.0081))**i for i in range(0, 25)]
-    tarifas        = [CONSTS.get('TARIFA_INICIAL', 1.22) * ((1+CONSTS.get('TARIFA_INFLACAO_ANUAL', 0.08))**i) for i in range(0, 25)]
-    consumo_ano    = [0.8 * dados.get('potencia_kit', 7.32) * CONSTS.get('CONST_IRRAD', 139) * 12*(( 1 + CONSTS.get('CRECIMENTO_ANUAL_CONSUMO', 0.2))**i) for i in range(0, 25)]
+    energia_gerada = [12 * potencia_kit * CONSTS['CONST_IRRAD'] * (1-CONSTS['DECRESCIMO_GERACAO'])**i for i in range(0, 25)]
+    tarifas        = [CONSTS['TARIFA_INICIAL'] * ((1+CONSTS['TARIFA_INFLACAO_ANUAL'])**i) for i in range(0, 25)]
+    consumo_ano    = [0.8 * potencia_kit * CONSTS['CONST_IRRAD'] * 12*(( 1 + CONSTS['CRECIMENTO_ANUAL_CONSUMO'])**i) for i in range(0, 25)]
     C_geracao =[]
     for tarifa, energia, consumo in zip(tarifas, energia_gerada, consumo_ano):
-        val = energia * tarifa * CONSTS.get('CONST_FATOR_DIURNO', 0.5) *  CONSTS.get('CONST_TUSDgd', 0.2)
+        val = energia * tarifa * CONSTS['CONST_FATOR_DIURNO'] * CONSTS['CONST_TUSDgd']
         if energia <= consumo:
             val += +((consumo-energia)*tarifa)
         C_geracao.append(val)
@@ -531,10 +561,10 @@ def gen_finace_data(dados: dict):
     
     custos = []
     for i in range(0, 25):
-        monitoramewnto = (dados.get('modulos', {'quantidade': 12}).get('quantidade', 12) * dados.get('Potencia_modulos', 610) * CONSTS.get('CONST_IRRAD',139) / 2500)
-        limpeza = (25 * dados.get('modulos', {'quantidade': 12}).get('quantidade', 12))
-        custos.append((monitoramewnto + limpeza) * (( 1 + CONSTS.get('MANUTENCAO_INFLACAO_ANUAL', 0.03))**i))
-    custos[0] = dados.get('valor', 00.00 )
+        monitoramewnto = (_mod.get('quantidade', 12) * _mod.get('potencia', 610) * CONSTS['CONST_IRRAD'] / 2500)
+        limpeza = (25 * _mod.get('quantidade', 12))
+        custos.append((monitoramewnto + limpeza) * (( 1 + CONSTS['MANUTENCAO_INFLACAO_ANUAL'])**i))
+    custos[0] = dados.get('valor_total', 0.0)
 
     economia = [s - c for s, c in zip(S_geracao, C_geracao)]
     fluxo_caixa = [e - c for e, c in zip(economia, custos)]
@@ -568,10 +598,10 @@ def render_proposta_p7(dados: dict, documento):
     y = A4[1] - 1.61*CM - sheet_padding_top
     documento.drawImage(file_route("investimento.png"), sheet_padding_left, y, width=17.49*CM, height=1.61*CM)
     dados_investimento = [
-        ('PREÇO DO SISTEMA INSTALADO: ', f"R$ {tousand_separator(dados.get('valor', '0.00'))}"),
-        ('PRAZO DE INSTALAÇÃO: ', f"{dados.get('prazo_instalacao', '0')} Dias"),
-        ('FORMA DE PAGAMENTO: ', dados.get('forma_pagamento', 'N/A')),
-        ('CONDIÇÃO DE PAGAMENTO: ', dados.get('condicao_pagamento', 'N/A')),
+        ('PREÇO DO SISTEMA INSTALADO: ', f"R$ {tousand_separator(dados.get('valor_total', 0.0))}"),
+        ('PRAZO DE INSTALAÇÃO: ', f"{dados.get('prazoprazo_instalacao', 60)} Dias"),
+        ('FORMA DE PAGAMENTO: ', dados.get('forma_pgto', 'N/A')),
+        ('CONDIÇÃO DE PAGAMENTO: ', dados.get('consdicao_pgto', 'N/A')),
         ('RETORNO DO INVESTIMENTO: ', get_pay_back(''))
     ]
 
@@ -795,7 +825,7 @@ def render_proposta_p10(dados: dict, documento):
         leading=16,         # ESSENCIAL: Espaço entre as linhas quando o texto quebrar
         alignment=TA_CENTER # Centraliza o texto dentro do parágrafo
     )
-    endereco = Paragraph(dados.get("endereco", ""), estilo_texto)
+    endereco = Paragraph(dados.get('cliente_json', {}).get('endereco', ''), estilo_texto)
     endereco_width, endereco_height = endereco.wrap(A4[0]-2*sheet_padding_left, 0)
     y-= (p_LINE_HEIGHT + endereco_height)
     endereco.drawOn(documento, (A4[0]-endereco_width)/2, y)
@@ -806,7 +836,7 @@ def render_proposta_p10(dados: dict, documento):
     Paragraphs = [
         [Paragraph('Desde já, agradecemos pela confiança. Espero que possamos trabalhar juntos para garantir a vocês todos os benefícios que a energia solar pode proporcionar.', estilo_texto)],
         [Paragraph('Para esclarecer qualquer dúvida, conte com nosso atendimento, estaremos de prontidão para você.', estilo_texto)],
-        [Paragraph(f'Essa proposta tem validade de {dados.get("CONSTS", {"validade_proposta": "30 dias"}).get("validade_proposta", "30 dias")}.', estilo_texto)],
+        [Paragraph(f"Essa proposta tem validade de {dados.get('validade_proposta', 30)} dias.", estilo_texto)],
     ]
     tabela = Table(Paragraphs, colWidths=[A4[0]-2*sheet_padding_left])
     tabela.setStyle(TableStyle([
