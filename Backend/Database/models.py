@@ -121,6 +121,8 @@ class proposta(base):
     kit_json = Column(JSON, nullable=False)
     cliente_json = Column(JSON, nullable=False)
     consts = Column(JSON, nullable=False)
+    pricing_variables = Column(JSON, nullable=False)
+    rates = Column(JSON, nullable=False)
 
     cliente_rel = relationship("cliente")
     kit_rel = relationship("kit")
@@ -130,7 +132,9 @@ class proposta(base):
     validade_proposta = Column(Integer,nullable=False)
     forma_pgto = Column(String,nullable=False)
 
-    def __init__(self, cliente_id, kit_id,prazo_instalacao:int=60, consdicao_pgto:str='', validade_proposta:int=30,forma_pgto:str=''):
+    def __init__(self, cliente_id, kit_id,prazo_instalacao:int=60, consdicao_pgto:str='', validade_proposta:int=30,forma_pgto:str='',rates={"margim":0.3,"tax":0.07, "commission":0.00},pricing_variables={"instal_mod":60,"extra":350}):
+        for key in ("instal_mod","extra"):
+            if key not in pricing_variables.keys():raise KeyError(f"A chave obrigatória <<{key}>> está faltando no dicionário pricing_variables!")
         self.kit_id = kit_id
         self.kit_json = self.kit_data(kit_id)
 
@@ -138,21 +142,28 @@ class proposta(base):
         self.cliente_json = self.cliente_data(cliente_id)
 
         self.consts = {obj.nome:obj.valor for obj in session.query(propriedade).all()}
-        self.valor_total = self.Def_valor_total()
+        self.valor_total = self.Def_valor_total(
+            instal_mod=pricing_variables["instal_mod"],
+            extra=pricing_variables["extra"],
+            rates=rates)
+        
         self.data = dt.today().strftime("%d/%m/%Y")
 
         self.prazoprazo_instalacao = prazo_instalacao
         self.consdicao_pgto = consdicao_pgto
         self.validade_proposta = validade_proposta
         self.forma_pgto = forma_pgto
+        self.rates = rates
+        self.pricing_variables = pricing_variables 
 
-    def Def_valor_total(self,instal=60, extra=350 , rates={"margim":0.3,"tax":0.07, "commission":0.00}):
-        return (self.kit_json["preco_c"] + (self.kit_json["modulos_json"]["quantidade"] * instal) + extra)*produto([1+t for t in rates.values()])
+    def Def_valor_total(self,instal_mod, extra , rates):
+        return (self.kit_json["preco_c"] + (self.kit_json["modulos_json"]["quantidade"] * instal_mod) + extra)*produto([1+t for t in rates.values()])
 
     def cliente_data(self, id_):
         cliente_=session.query(cliente).filter_by(id=id_).first()
         if cliente_:
             c = cliente_.__dict__
+            print(c)
             c.pop('_sa_instance_state',None)
             return c
         raise KeyError("Cliente não encontrado")

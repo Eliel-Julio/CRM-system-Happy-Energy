@@ -180,10 +180,22 @@
                                 <option value="Boleto">Boleto</option>
                             </select>
                         </div>
-
+                        
                         <div class="form-group-compact">
                             <label for="condicaoPgto" class="form-label">Condição de Pagamento</label>
                             <input type="text" class="form-control" id="condicaoPgto" placeholder="Ex: 50% entrada + 50% na entrega">
+                        </div>
+                        
+                        <div class="form-group-compact">
+                            <label for="princing_type" class="form-label">Tipo de Precificação</label>
+                            <select class="form-select" id="princing_type">
+                                <option value="">fibrocimento - normal</option>
+                                <option value="">fibrocimento - promocional</option>
+                                <option value="">Laje - normal</option>
+                                <option value="">Laje - promocional</option>
+                                <option value="">Solo - normal</option>
+                                <option value="">Solo - promocional</option>
+                            </select>
                         </div>
 
                     </div>
@@ -316,6 +328,10 @@
                     opt.textContent = `${c.nome} — ${c.cidade_uf}`;
                     selCliente.appendChild(opt);
                 });
+                const newClienteOpt = document.createElement('option');
+                newClienteOpt.value = 'novo';
+                newClienteOpt.textContent = 'Novo Cliente';
+                selCliente.appendChild(newClienteOpt);
 
                 const selKit = document.getElementById('kitId');
                 kitsGlobal.forEach(k => {
@@ -324,18 +340,29 @@
                     opt.textContent = `${k.nome} (${k.modulo_json.quantidade || k.modulo_json.quantidade_modulos || 0} W)`;
                     selKit.appendChild(opt);
                 });
+                const newkitOpt = document.createElement('option');
+                newkitOpt.value = 'novo';
+                newkitOpt.textContent = 'Novo Kit';
+                selKit.appendChild(newkitOpt);
             } catch (e) {
                 console.error('Erro ao carregar selects:', e);
             }
         }
 
+        
         // Monitorar alteração nos Selects para habilitar/desabilitar botões de preview
         document.getElementById('clienteId').addEventListener('change', function() {
             document.getElementById('btnPreviewCliente').disabled = !this.value;
+            if (this.value === 'novo') {
+                window.location.href = '{{ url_for("leads") }}';
+            }
         });
 
         document.getElementById('kitId').addEventListener('change', function() {
             document.getElementById('btnPreviewKit').disabled = !this.value;
+            if (this.value === 'novo') {
+                window.location.href = '{{ url_for("kits") }}';
+            }
         });
 
         document.getElementById('btnLimparForm').addEventListener('click', function() {
@@ -455,6 +482,25 @@
         // ── Adicionar nova proposta ────────────────────────────────────
         document.getElementById('formNovaProposta').addEventListener('submit', async (e) => {
             e.preventDefault();
+            // Moc temporiário para taxas e variáveis de precificação, futuramente isso deve ser integrado ao backend para permitir personalização por proposta
+            princing_type = document.getElementById('princing_type').value || 'fibrocimento - normal';
+            rates = {
+                "fibrocimento - normal"     : {"margim":0.35,"tax":0.07, "commission":0.05},
+                "fibrocimento - promocional": {"margim":0.30,"tax":0.05, "commission":0.00},
+                "laje - normal"             : {"margim":0.35,"tax":0.07, "commission":0.05},
+                "laje - promocional"        : {"margim":0.30,"tax":0.05, "commission":0.00},
+                "solo - normal"             : {"margim":0.35,"tax":0.07, "commission":0.05},
+                "solo - promocional"        : {"margim":0.30,"tax":0.05, "commission":0.00}
+            };
+            princing_variables = {
+                "fibrocimento - normal"     : {"instal_mod": 60 ,"extra": 350},
+                "fibrocimento - promocional": {"instal_mod": 60 ,"extra": 350},
+                "laje - normal"             : {"instal_mod": 60 ,"extra": 350},
+                "laje - promocional"        : {"instal_mod": 60 ,"extra": 350},
+                "solo - normal"             : {"instal_mod": 120,"extra": 350},
+                "solo - promocional"        : {"instal_mod": 120,"extra": 350}
+            };
+            
 
             const payload = {
                 cliente_id:         parseInt(document.getElementById('clienteId').value),
@@ -463,6 +509,8 @@
                 validade_proposta:  parseInt(document.getElementById('validadeProposta').value) || 30,
                 forma_pgto:         document.getElementById('formaPgto').value,
                 condicao_pgto:      document.getElementById('condicaoPgto').value,
+                rates:              rates[princing_type] || {"margim":0.3,"tax":0.07, "commission":0.00},
+                pricing_variables:  princing_variables[princing_type] || {"instal_mod":60,"extra":350}
             };
 
             try {

@@ -21,6 +21,8 @@ def get_orcamentos():
         'condicao_pgto':orcamento.consdicao_pgto,
         'validade_proposta':orcamento.validade_proposta,
         'forma_pgto':orcamento.forma_pgto,
+        'pricing_variables': orcamento.pricing_variables,
+        'rates': orcamento.rates
 
     } for orcamento in orcamentos])
 
@@ -36,7 +38,9 @@ def novo_orcamento():
             prazo_instalacao=dados.get('prazo_instalacao', 60),
             consdicao_pgto=dados.get('condicao_pgto', ''),
             validade_proposta=dados.get('validade_proposta', 30),
-            forma_pgto=dados.get('forma_pgto', '')
+            forma_pgto=dados.get('forma_pgto', ''),
+            rates=dados.get('rates', {"margim":0.3,"tax":0.07, "commission":0.00}),
+            pricing_variables=dados.get('pricing_variables', {"instal_mod":60,"extra":350})
         )
     
         session.add(orcamento_obj)
