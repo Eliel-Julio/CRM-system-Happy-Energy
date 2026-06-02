@@ -1,0 +1,6 @@
+Flask
+Flask-Cors
+SQLAlchemy
+reportlab
+requests
+gunicorn
