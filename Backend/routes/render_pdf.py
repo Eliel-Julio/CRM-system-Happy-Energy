@@ -14,10 +14,10 @@ def download_orcamento(orcamento_id):
 
         buffer = render_proposta(orcamento_)
 
-        # nome_cliente = (orcamento_.get('cliente_json',{"nome": 'anonimo'}).get('nome','Anonimo')).replace(' ', '_')
-        # nome_cliente = orcamento_['cliente_json']['nome'].replace(' ', '_') 
-        # nome_arquivo = f"Proposta_{orcamento_id}_{nome_cliente}.pdf"
-        nome_arquivo = f"Proposta_{orcamento_id}.pdf"
+        nome_cliente = (orcamento_.get('cliente_json',{"nome": 'anonimo'}).get('nome','Anonimo')).replace(' ', '_')
+        nome_cliente = orcamento_['cliente_json']['nome'].replace(' ', '_') 
+        nome_arquivo = f"Proposta_{orcamento_id}_{nome_cliente}.pdf"
+        # nome_arquivo = f"Proposta_{orcamento_id}.pdf"
         # return jsonify(orcamento_)
         return send_file(
             buffer,

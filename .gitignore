@@ -50,3 +50,7 @@ Thumbs.db
 # Zip de fontes (não é necessário no servidor)
 *.zip
 Backend/main.ipynb
+Backend/main.ipynb
+/Front/__pycache__
+/Backend/__pycache__
+/Backend/Database/__pycache__

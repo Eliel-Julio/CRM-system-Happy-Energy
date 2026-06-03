@@ -3,12 +3,14 @@ from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignK
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime as dt
 
+# Declarative base deve ser criado antes da session para garantir instrumentação
+base = declarative_base()
+
 # Garantir que o arquivo sqlite `crm.db` seja criado no mesmo diretório deste arquivo
 _db_file = Path(__file__).resolve().parent / "crm.db"
 engine = create_engine(f"sqlite:///{_db_file.as_posix()}")
 Session = sessionmaker(bind=engine)
 session = Session()
-base = declarative_base()
 
 def produto(list:list, t=1):
     for v in list:t*=v
