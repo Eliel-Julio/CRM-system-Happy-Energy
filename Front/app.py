@@ -14,4 +14,4 @@ app.jinja_env.globals['BASE'] = app.config['BACKEND_URL']
 from routes import *
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 3000)))
+    app.run(host='0.0.0.0', port=int(os.getenv('FRONTEND_PORT', 3001)), debug=True)

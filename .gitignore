@@ -54,3 +54,6 @@ Backend/main.ipynb
 /Front/__pycache__
 /Backend/__pycache__
 /Backend/Database/__pycache__
+Backend/Database/__pycache__/models.cpython-311.pyc
+/Backend/routes/__pycache__
+Backend/routes/__pycache__/render_pdf.cpython-311.pyc
