@@ -54,3 +54,4 @@ Backend/main.ipynb
 /Front/__pycache__
 /Backend/__pycache__
 /Backend/Database/__pycache__
+*.pyc
